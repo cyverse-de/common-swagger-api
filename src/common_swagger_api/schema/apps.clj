@@ -543,6 +543,9 @@
           :disabled
           AppDisabledParam
 
+          (optional-key :version)
+          (describe String "The App's latest version")
+
           :integrator_email
           (describe String "The App integrator's email address")
 
