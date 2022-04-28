@@ -35,6 +35,9 @@
 (def AppCreateSummary "Add a new App.")
 (def AppCreateDocs "This service adds a new App to the user's workspace.")
 
+(def AppVersionCreateSummary "Add a new App Version.")
+(def AppVersionCreateDocs "This service adds a new App Version to an existing App.")
+
 (def AppDeleteSummary "Logically Deleting an App")
 (def AppDeleteDocs
   "An app can be marked as deleted in the DE without being completely removed from the database using this service.
@@ -698,6 +701,12 @@
       (st/optional-keys [:id])
       (assoc OptionalGroupsKey (describe [AppGroupRequest] GroupListDocs)
              OptionalToolsKey  (describe [AppToolRequest] ToolListDocs))))
+
+(defschema AppVersionRequest
+  (-> AppRequest
+      (st/dissoc :version_id)
+      (st/required-keys [:version])
+      (describe "The App Version to add.")))
 
 (def AppCreateRequest (describe AppRequest "The App to add."))
 (def AppUpdateRequest (describe AppRequest "The App to update."))
