@@ -10,3 +10,13 @@
 (defschema AgaveJobStatusUpdate
   {:lastUpdated (describe String "The time the job status was last updated")
    Keyword      Any})
+
+(defschema TapisJobStatusUpdateEvent
+  {:timestamp (describe String "The time the job status was created")
+   :type      (describe String "The status assigned to the job by Tapis")
+   :data      (describe String "The job status JSON encoded as a string")
+   Keyword    Any})
+
+(defschema TapisJobStatusUpdate
+  {:event   TapisJobStatusUpdateEvent
+   Keyword  Any})
