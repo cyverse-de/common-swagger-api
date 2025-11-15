@@ -5,9 +5,10 @@
             :url "http://iplantcollaborative.org/sites/default/files/iPLANT-LICENSE.txt"}
   :deploy-repositories [["releases" :clojars]
                         ["snapshots" :clojars]]
-  :dependencies [[org.clojure/clojure "1.12.0"]
+  :dependencies [[org.clojure/clojure "1.12.3"]
                  [cheshire "5.13.0"]
                  [metosin/compojure-api "1.1.14"]
+                 [metosin/malli "0.19.2"]
                  [metosin/schema-tools "0.13.1"]
                  [org.cyverse/clojure-commons "3.0.11"]
                  [org.cyverse/heuristomancer "2.8.7"]
