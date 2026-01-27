@@ -1,4 +1,4 @@
-(defproject org.cyverse/common-swagger-api "3.4.14"
+(defproject org.cyverse/common-swagger-api "3.4.15-SNAPSHOT"
   :description "Common library for Swagger documented RESTful APIs"
   :url "https://github.com/cyverse-de/common-swagger-api"
   :license {:name "BSD"
