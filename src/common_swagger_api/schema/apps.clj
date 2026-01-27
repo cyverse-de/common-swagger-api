@@ -443,6 +443,8 @@
               (optional-key :default_cpu_cores)     (describe Double "The default minimum of CPU cores requested to run the tool container")
               (optional-key :default_memory)        (describe Long "The default amount of memory (in bytes) requested to run the tool container")
               (optional-key :default_disk_space)    (describe Long "The default amount of disk space requested to run the tool container")
+              (optional-key :default_max_gpus)      (describe Int "The default limit for GPUs for running the tool container")
+              (optional-key :default_gpus)          (describe Int "The default minimum for GPUs requested for running the tool container")
               :step_number                          (describe Int "The sequential step number of the Tool in the analysis")})
       (describe "The Tool resource requirements for this step")))
 
