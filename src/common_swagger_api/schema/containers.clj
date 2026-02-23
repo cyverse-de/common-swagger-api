@@ -36,6 +36,7 @@
        (s/optional-key :min_gpus)          (describe s/Int "The minimum number of GPUs needed to run the tool container")
        (s/optional-key :max_gpus)          (describe s/Int "The maximum number of GPUs allowed when running the tool container")
        (s/optional-key :min_disk_space)    (describe Long "The minimum amount of disk space needed to run the tool container")
+       (s/optional-key :gpu_models)        (describe [s/Str] "The GPU models that work with this tool container. Empty means no limitation on GPU model.")
        (s/optional-key :network_mode)      (describe s/Str "The network mode for the tool container")
        (s/optional-key :working_directory) (describe s/Str "The working directory in the tool container")
        (s/optional-key :name)              (describe s/Str "The name given to the tool container")

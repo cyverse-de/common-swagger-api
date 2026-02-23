@@ -119,6 +119,7 @@
                                                :min_gpus
                                                :max_gpus
                                                :min_disk_space
+                                               :gpu_models
                                                :step_number]))
 
 (defschema AnalysisSubmission
