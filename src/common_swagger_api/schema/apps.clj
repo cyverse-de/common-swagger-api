@@ -446,6 +446,7 @@
               (optional-key :default_disk_space)    (describe Long "The default amount of disk space requested to run the tool container")
               (optional-key :default_max_gpus)      (describe Int "The default limit for GPUs for running the tool container")
               (optional-key :default_gpus)          (describe Int "The default minimum for GPUs requested for running the tool container")
+              (optional-key :default_gpu_models)    (describe [s/Str] "The default list of acceptable GPU models")
               :step_number                          (describe Int "The sequential step number of the Tool in the analysis")})
       (describe "The Tool resource requirements for this step")))
 
