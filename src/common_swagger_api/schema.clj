@@ -1,13 +1,14 @@
 (ns common-swagger-api.schema
-  (:require [clojure.string :refer [blank?]]
-            [clojure-commons.error-codes :as ce]
-            [compojure.api.sweet]
-            [potemkin :refer [import-vars]]
-            [ring.swagger.json-schema :as json-schema]
-            [schema-tools.core :as st]
-            [schema.core :as s]
-            [schema.spec.core :as spec :include-macros true]
-            [schema.spec.variant :as variant]))
+  (:require
+   [clojure-commons.error-codes :as ce]
+   [clojure.string :refer [blank?]]
+   [compojure.api.sweet]
+   [potemkin :refer [import-vars]]
+   [ring.swagger.json-schema :as json-schema]
+   [schema-tools.core :as st]
+   [schema.core :as s]
+   [schema.spec.core :as spec :include-macros true]
+   [schema.spec.variant :as variant]))
 
 (import-vars
   [compojure.api.sweet
@@ -51,6 +52,14 @@
        (map f)
        (apply s/enum)
        (copy-json-schema-meta enum)))
+
+(defn add-to-enum
+  "Adds additional values to an existing enumeration."
+  [enum & vs]
+  (as-> (st/schema-value enum) x
+    (apply conj x vs)
+    (apply s/enum x)
+    (copy-json-schema-meta enum x)))
 
 (defn ->optional-param
   "Removes a required param from the given schema and re-adds it as an optional param."
