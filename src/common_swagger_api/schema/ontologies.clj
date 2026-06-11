@@ -1,7 +1,7 @@
 (ns common-swagger-api.schema.ontologies
   (:require [common-swagger-api.schema :refer [describe NonBlankString]]
             [schema.core :as s])
-  (:import [java.util Date]))
+  (:import [java.util Date UUID]))
 
 (def OntologyVersionParam (describe String "The unique version of the Ontology"))
 (def OntologyClassIRIParam (describe String "A unique Class IRI"))
@@ -35,3 +35,10 @@
 
 (s/defschema OntologyHierarchyList
   {:hierarchies (describe [OntologyClassHierarchy] "A list of Ontology Class hierarchies")})
+
+(s/defschema TargetOntologyHierarchies
+  {:id          (describe UUID "The target item's UUID")
+   :hierarchies (describe [OntologyClassHierarchy] "Filtered hierarchies for this target")})
+
+(s/defschema TargetOntologyHierarchiesList
+  {:targets (describe [TargetOntologyHierarchies] "Per-target filtered hierarchy results")})
