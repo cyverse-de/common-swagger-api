@@ -479,6 +479,9 @@
           OptionalDebugKey
           (describe Boolean "True if input files should be retained for the job by default.")
 
+          (optional-key :mount_data_store)
+          (describe Boolean "True if iRODS data store mounts should be created in the analysis container.")
+
           (optional-key :requirements)
           (describe [AppStepResourceRequirements] "The list of resource requirements for each step")
 
