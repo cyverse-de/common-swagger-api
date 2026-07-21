@@ -482,6 +482,9 @@
           (optional-key :mount_data_store)
           (describe Boolean "True if iRODS data store mounts should be created in the analysis container.")
 
+          (optional-key :overall_job_type)
+          (describe String "The overall job type of the app: interactive, executable, osg, mixed, or unknown.")
+
           (optional-key :requirements)
           (describe [AppStepResourceRequirements] "The list of resource requirements for each step")
 
