@@ -187,7 +187,10 @@
    (describe Boolean "True if the job logs should be uploaded to the data store.")
 
    (optional-key :mount_data_store)
-   (describe Boolean "True if iRODS CSI Driver mounts should be created in the container.")})
+   (describe Boolean "True if iRODS CSI Driver mounts should be created in the container.")
+
+   (optional-key :time_limit_seconds)
+   (describe Integer "The requested initial duration for the analysis, in seconds. Only used for interactive VICE analyses.")})
 
 (defschema AnalysisResponse
   {:id         (describe UUID "The ID of the submitted analysis.")

@@ -485,6 +485,12 @@
           (optional-key :overall_job_type)
           (describe String "The overall job type of the app: interactive, executable, osg, mixed, or unknown.")
 
+          (optional-key :time_limit_seconds)
+          (describe Int "The initial duration in seconds from the original submission, returned on relaunch-info and saved-launch-info responses.")
+
+          (optional-key :max_time_limit_seconds)
+          (describe Int "The maximum initial duration that may be requested at launch time, in seconds.")
+
           (optional-key :requirements)
           (describe [AppStepResourceRequirements] "The list of resource requirements for each step")
 
