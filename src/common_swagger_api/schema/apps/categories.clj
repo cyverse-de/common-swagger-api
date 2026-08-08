@@ -44,7 +44,8 @@
    or any of its subcategories.")
 
 (def AppCategoryNameParam (describe String "The App Category's name"))
-(def AppCommunityGroupNameParam (describe String "The full group name of the App Community"))
+(def AppCommunityGroupNameParam
+  (describe String "The App Community's identifier: its ID, its name, or a legacy colon-delimited group path"))
 
 (defschema CategoryListingParams
   {(optional-key :public)
