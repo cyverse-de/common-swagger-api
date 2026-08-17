@@ -6,7 +6,7 @@
   :deploy-repositories [["releases" :clojars]
                         ["snapshots" :clojars]]
   :dependencies [[org.clojure/clojure "1.12.5"]
-                 [cheshire "5.13.0"]
+                 [cheshire "6.2.0"]
                  [metosin/compojure-api "1.1.14"]
                  [metosin/malli "0.19.2"]
                  [metosin/schema-tools "0.13.1"]
