@@ -686,6 +686,14 @@
           AppJobStatsEndDateOptionalParam
           (describe Date AppJobStatsEndDateParamDocs)
 
+          (optional-key :attribute)
+          (describe String (str "Must be used in conjunction with `attribute_value`. If specified, only apps that are "
+                                "tagged with the specified attribute/value pair will be included in the listing."))
+
+          (optional-key :attribute_value)
+          (describe String (str "Must be used in conjunction with `attribute`. If specified, only apps that are tagged "
+                                "with the specified attribute/value pair will be included in the listing."))
+
           SortFieldOptionalKey
           (describe (apply enum AppSearchValidSortFields) SortFieldDocs)}))
 
