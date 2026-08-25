@@ -712,9 +712,19 @@
   {(optional-key :app-type)
    (describe String "The type of app to include in the listing.")})
 
+(defschema AttributeValueSelectionParams
+  {(optional-key :attribute)
+   (describe String (str "Must be used in conjunction with `attribute_value`. If specified, only apps that are "
+                         "tagged with the specified attribute/value pair will be included in the listing."))
+
+   (optional-key :attribute_value)
+   (describe String (str "Must be used in conjunction with `attribute`. If specified, only apps that are tagged "
+                         "with the specified attribute/value pair will be included in the listing."))})
+
 (defschema AppListingPagingParams
   (merge PagingParams
          AppFilterParams
+         AttributeValueSelectionParams
          {SortFieldOptionalKey
           (describe (apply enum AppListingValidSortFields) SortFieldDocs)}))
 
@@ -727,6 +737,7 @@
 (defschema AppSearchParams
   (merge PagingParams
          AppFilterParams
+         AttributeValueSelectionParams
          {(optional-key :search)
           (describe String
                     "The pattern to match in an App's Name, Description, Integrator Name, or Tool Name.")
@@ -736,14 +747,6 @@
 
           AppJobStatsEndDateOptionalParam
           (describe Date AppJobStatsEndDateParamDocs)
-
-          (optional-key :attribute)
-          (describe String (str "Must be used in conjunction with `attribute_value`. If specified, only apps that are "
-                                "tagged with the specified attribute/value pair will be included in the listing."))
-
-          (optional-key :attribute_value)
-          (describe String (str "Must be used in conjunction with `attribute`. If specified, only apps that are tagged "
-                                "with the specified attribute/value pair will be included in the listing."))
 
           SortFieldOptionalKey
           (describe (apply enum AppSearchValidSortFields) SortFieldDocs)}))
