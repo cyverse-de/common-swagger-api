@@ -83,7 +83,3 @@
 (defschema AppCategoryAppListing
   (merge (dissoc AppCategory :categories)
          {:apps (describe [AppListingDetail] "A listing of Apps under this Category")}))
-
-(defschema OntologyAppListingPagingParams
-  (merge AppListingPagingParams
-         OntologyHierarchyFilterParams))
