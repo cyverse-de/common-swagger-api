@@ -7,15 +7,15 @@
 (def AppCommunityMetadataDeleteDocs
   "Removes the app from each of the given communities.
    The authenticated user must be an admin of every community in the request.
-   A caller identifies each community by its ID in `community_ids`; the legacy
-   `avus` list is still accepted while stale clients remain in circulation.")
+   A caller identifies each community by its ID in `community_ids`. The `avus`
+   list is accepted as a deprecated alternative.")
 
 (def AppCommunityAddSummary "Add an App to Communities")
 (def AppCommunityAddDocs
   "Adds the app to each of the given communities.
    The authenticated user must be an admin of every community in the request.
-   The stored tag format belongs to the service, so a caller identifies a community
-   by its ID rather than composing the value itself.")
+   A caller identifies each community by its ID in `community_ids`. The `avus`
+   list is accepted as a deprecated alternative.")
 
 (def AppCommunityDeleteSummary "Remove an App from a Community")
 (def AppCommunityDeleteDocs
