@@ -22,6 +22,7 @@
             [schema.core
              :refer [defschema
                      enum
+                     maybe
                      optional-key
                      recursive
                      Any
@@ -451,6 +452,56 @@
               :step_number                          (describe Int "The sequential step number of the Tool in the analysis")})
       (describe "The Tool resource requirements for this step")))
 
+(defschema ResourcePreset
+  {:id
+   (describe UUID "The resource preset identifier.")
+
+   :label
+   (describe String "The display label for this preset.")
+
+   :description
+   (describe (maybe String) "A longer description of this preset, or null if not set.")
+
+   :max_cpu_cores
+   (describe Double "The CPU cores allocated by this preset.")
+
+   :min_memory_limit
+   (describe Long "The memory in bytes allocated by this preset.")
+
+   :max_gpus
+   (describe Int "The number of GPUs allocated by this preset.")
+
+   :time_limit_seconds
+   (describe (maybe Int) "The VICE analysis time limit in seconds for this preset, or null for no override.")
+
+   :display_order
+   (describe Int "The display ordering of this preset relative to others.")
+
+   :is_default
+   (describe Boolean "True if this preset is the global default selection.")
+
+   :is_enabled
+   (describe Boolean "True if this preset is currently active and available for selection.")})
+
+(defschema ResourcePresetList
+  {:resource_presets (describe [ResourcePreset] "The list of resource presets.")})
+
+(defschema ResourcePresetRequest
+  "Schema for creating a new resource preset. Required: label, max_cpu_cores, min_memory_limit."
+  (-> ResourcePreset
+      (st/dissoc :id)
+      (->optional-param :description)
+      (->optional-param :time_limit_seconds)
+      (->optional-param :max_gpus)
+      (->optional-param :display_order)
+      (->optional-param :is_default)
+      (->optional-param :is_enabled)))
+
+(defschema ResourcePresetUpdateRequest
+  "Schema for updating an existing resource preset. All fields are optional.
+   Nullable fields (description, time_limit_seconds) accept null to clear the value."
+  (st/optional-keys (st/dissoc ResourcePreset :id)))
+
 (defschema AppGroupJobView
   (merge AppGroup
          {:id                   (describe String "The app group ID.")
@@ -661,9 +712,19 @@
   {(optional-key :app-type)
    (describe String "The type of app to include in the listing.")})
 
+(defschema AttributeValueSelectionParams
+  {(optional-key :attribute)
+   (describe String (str "Must be used in conjunction with `attribute_value`. If specified, only apps that are "
+                         "tagged with the specified attribute/value pair will be included in the listing."))
+
+   (optional-key :attribute_value)
+   (describe String (str "Must be used in conjunction with `attribute`. If specified, only apps that are tagged "
+                         "with the specified attribute/value pair will be included in the listing."))})
+
 (defschema AppListingPagingParams
   (merge PagingParams
          AppFilterParams
+         AttributeValueSelectionParams
          {SortFieldOptionalKey
           (describe (apply enum AppListingValidSortFields) SortFieldDocs)}))
 
@@ -676,6 +737,7 @@
 (defschema AppSearchParams
   (merge PagingParams
          AppFilterParams
+         AttributeValueSelectionParams
          {(optional-key :search)
           (describe String
                     "The pattern to match in an App's Name, Description, Integrator Name, or Tool Name.")
