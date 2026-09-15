@@ -105,31 +105,35 @@
 
 (deftest DataSourceListing
   (valid elements/DataSourceListing {:data_sources []} {:data_sources [data-source]})
-  (invalid elements/DataSourceListing {} {:data_sources [{}]} {:data_sources [] :extra 1}))
+  (invalid elements/DataSourceListing {} {:data_sources "x"} {:data_sources [{}]} {:data_sources [] :extra 1}))
 
 (deftest FileFormatListing
   (valid elements/FileFormatListing {:formats []} {:formats [file-format]})
-  (invalid elements/FileFormatListing {} {:formats [{}]} {:formats [] :extra 1}))
+  (invalid elements/FileFormatListing {} {:formats "x"} {:formats [{}]} {:formats [] :extra 1}))
 
 (deftest InfoTypeListing
   (valid elements/InfoTypeListing {:info_types []} {:info_types [info-type]})
-  (invalid elements/InfoTypeListing {} {:info_types [{}]} {:info_types [] :extra 1}))
+  (invalid elements/InfoTypeListing {} {:info_types "x"} {:info_types [{}]} {:info_types [] :extra 1}))
 
 (deftest ParameterTypeListing
   (valid elements/ParameterTypeListing {:parameter_types []} {:parameter_types [parameter-type]})
-  (invalid elements/ParameterTypeListing {} {:parameter_types [{}]} {:parameter_types [] :extra 1}))
+  (invalid elements/ParameterTypeListing
+           {}
+           {:parameter_types "x"}
+           {:parameter_types [{}]}
+           {:parameter_types [] :extra 1}))
 
 (deftest RuleTypeListing
   (valid elements/RuleTypeListing {:rule_types []} {:rule_types [rule-type]})
-  (invalid elements/RuleTypeListing {} {:rule_types [{}]} {:rule_types [] :extra 1}))
+  (invalid elements/RuleTypeListing {} {:rule_types "x"} {:rule_types [{}]} {:rule_types [] :extra 1}))
 
 (deftest ToolTypeListing
   (valid elements/ToolTypeListing {:tool_types []} {:tool_types [tool-type]})
-  (invalid elements/ToolTypeListing {} {:tool_types [{}]} {:tool_types [] :extra 1}))
+  (invalid elements/ToolTypeListing {} {:tool_types "x"} {:tool_types [{}]} {:tool_types [] :extra 1}))
 
 (deftest ValueTypeListing
   (valid elements/ValueTypeListing {:value_types []} {:value_types [value-type]})
-  (invalid elements/ValueTypeListing {} {:value_types [{}]} {:value_types [] :extra 1}))
+  (invalid elements/ValueTypeListing {} {:value_types "x"} {:value_types [{}]} {:value_types [] :extra 1}))
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.apps.elements))

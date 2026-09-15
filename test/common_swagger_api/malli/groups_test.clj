@@ -85,22 +85,27 @@
   (valid (groups/group-with-detail "group") group-value (assoc group-value :detail detail-value))
   (invalid (groups/group-with-detail "group")
            base-value
+           (assoc group-value :detail "x")
            (assoc group-value :detail {})
            (assoc group-value :detail detail-value :extra 1)))
 
 (deftest group-list
   (valid (groups/group-list "group" "groups") {:groups []} {:groups [group-value]})
-  (invalid (groups/group-list "group" "groups") {} {:groups [base-value]} {:groups [] :extra 1}))
+  (invalid (groups/group-list "group" "groups") {} {:groups "x"} {:groups [base-value]} {:groups [] :extra 1}))
 
 (deftest group-list-with-detail
   (valid (groups/group-list-with-detail "group" "groups")
          {:groups []}
          {:groups [(assoc group-value :detail detail-value)]})
-  (invalid (groups/group-list-with-detail "group" "groups") {} {:groups [{}]} {:groups [] :extra 1}))
+  (invalid (groups/group-list-with-detail "group" "groups")
+           {}
+           {:groups "x"}
+           {:groups [{}]}
+           {:groups [] :extra 1}))
 
 (deftest group-members
   (valid (groups/group-members "group") {:members []} {:members [subject-value]})
-  (invalid (groups/group-members "group") {} {:members [{}]} {:members [] :extra 1}))
+  (invalid (groups/group-members "group") {} {:members "x"} {:members [{}]} {:members [] :extra 1}))
 
 (deftest GroupMembersUpdate
   (valid groups/GroupMembersUpdate {:members []} {:members ["user1" "user2"]})
@@ -119,7 +124,7 @@
 
 (deftest GroupMembersUpdateResponse
   (valid groups/GroupMembersUpdateResponse {:results []} {:results [member-update-result]})
-  (invalid groups/GroupMembersUpdateResponse {} {:results [{}]} {:results [] :extra 1}))
+  (invalid groups/GroupMembersUpdateResponse {} {:results "x"} {:results [{}]} {:results [] :extra 1}))
 
 (deftest GroupPrivilegeUpdate
   (valid groups/GroupPrivilegeUpdate privilege-update (assoc privilege-update :privileges []))
@@ -131,7 +136,7 @@
 
 (deftest GroupPrivilegeUpdates
   (valid groups/GroupPrivilegeUpdates {:updates []} {:updates [privilege-update]})
-  (invalid groups/GroupPrivilegeUpdates {} {:updates [{}]} {:updates [] :extra 1}))
+  (invalid groups/GroupPrivilegeUpdates {} {:updates "x"} {:updates [{}]} {:updates [] :extra 1}))
 
 (deftest GroupPrivilegeRemoval
   (valid groups/GroupPrivilegeRemoval privilege-update (assoc privilege-update :privileges ["admin"]))
@@ -143,7 +148,7 @@
 
 (deftest GroupPrivilegeRemovals
   (valid groups/GroupPrivilegeRemovals {:updates []} {:updates [privilege-update]})
-  (invalid groups/GroupPrivilegeRemovals {} {:updates [{}]} {:updates [] :extra 1}))
+  (invalid groups/GroupPrivilegeRemovals {} {:updates "x"} {:updates [{}]} {:updates [] :extra 1}))
 
 (deftest Privilege
   (valid groups/Privilege privilege-value (assoc privilege-value :allowed true :revokable true))
@@ -155,7 +160,7 @@
 
 (deftest Privileges
   (valid groups/Privileges {:privileges []} {:privileges [privilege-value]})
-  (invalid groups/Privileges {} {:privileges [{}]} {:privileges [] :extra 1}))
+  (invalid groups/Privileges {} {:privileges "x"} {:privileges [{}]} {:privileges [] :extra 1}))
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.groups))

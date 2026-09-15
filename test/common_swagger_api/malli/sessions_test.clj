@@ -43,7 +43,7 @@
 
 (deftest ListLoginsResponse
   (valid sessions/ListLoginsResponse {:logins []} {:logins [{:login_time login-time}]})
-  (invalid sessions/ListLoginsResponse {} {:logins [{}]} {:logins [] :extra 1}))
+  (invalid sessions/ListLoginsResponse {} {:logins "x"} {:logins [{}]} {:logins [] :extra 1}))
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.sessions))

@@ -47,7 +47,7 @@
 
 (deftest AvuListRequest
   (valid metadata/AvuListRequest {:avus []} {:avus [avu-request]})
-  (invalid metadata/AvuListRequest {} {:avus [{}]} {:avus [] :extra 1}))
+  (invalid metadata/AvuListRequest {} {:avus "x"} {:avus [{}]} {:avus [] :extra 1}))
 
 (deftest SetAvuRequest
   (valid metadata/SetAvuRequest {} {:avus []} {:avus [avu-request]})

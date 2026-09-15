@@ -9,12 +9,15 @@
 (deftest UserRatingParam
   (valid [:map {:closed true} (rating/UserRatingParam :user)] {:user 5})
   (valid [:map {:closed true} (rating/UserRatingParam :user true)] {} {:user 5})
-  (invalid [:map {:closed true} (rating/UserRatingParam :user)] {} {:user 5.0} {:user "5"}))
+  (invalid [:map {:closed true} (rating/UserRatingParam :user)] {} {:user 5.0} {:user "5"} {:user 5 :extra 1}))
 
 (deftest CommentIdParam
   (valid [:map {:closed true} (rating/CommentIdParam :comment_id)] {:comment_id 123})
   (valid [:map {:closed true} (rating/CommentIdParam :comment_id true)] {} {:comment_id 123})
-  (invalid [:map {:closed true} (rating/CommentIdParam :comment_id)] {} {:comment_id "123"}))
+  (invalid [:map {:closed true} (rating/CommentIdParam :comment_id)]
+           {}
+           {:comment_id "123"}
+           {:comment_id 123 :extra 1}))
 
 (deftest RatingResponse
   (valid rating/RatingResponse rating-response)

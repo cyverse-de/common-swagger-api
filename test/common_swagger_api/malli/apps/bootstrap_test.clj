@@ -37,6 +37,7 @@
   (invalid bootstrap/AppsBootstrapResponse
            {}
            (dissoc bootstrap-response :webhooks)
+           (assoc bootstrap-response :webhooks "x")
            (assoc bootstrap-response :workspace (dissoc workspace :id))
            (assoc bootstrap-response :system_ids {})
            (assoc bootstrap-response :extra 1)))

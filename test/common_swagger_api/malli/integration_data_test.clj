@@ -44,6 +44,7 @@
   (invalid integration-data/IntegrationDataListing
            {}
            {:integration_data []}
+           {:integration_data "x" :total 0}
            {:integration_data [{}] :total 1}
            {:integration_data [] :total "0"}
            {:integration_data [] :total 0 :extra 1}))

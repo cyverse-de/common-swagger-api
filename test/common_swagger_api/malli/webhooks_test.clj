@@ -42,7 +42,7 @@
 
 (deftest WebhookList
   (valid webhooks/WebhookList {:webhooks []} {:webhooks [webhook]})
-  (invalid webhooks/WebhookList {} {:webhooks [{}]} {:webhooks [] :extra 1}))
+  (invalid webhooks/WebhookList {} {:webhooks "x"} {:webhooks [{}]} {:webhooks [] :extra 1}))
 
 (deftest Topic
   (valid webhooks/Topic topic)
@@ -50,11 +50,11 @@
 
 (deftest TopicList
   (valid webhooks/TopicList {:topics []} {:topics [topic]})
-  (invalid webhooks/TopicList {} {:topics [{}]} {:topics [] :extra 1}))
+  (invalid webhooks/TopicList {} {:topics "x"} {:topics [{}]} {:topics [] :extra 1}))
 
 (deftest WebhookTypeList
   (valid webhooks/WebhookTypeList {:webhooktypes []} {:webhooktypes [webhook-type]})
-  (invalid webhooks/WebhookTypeList {} {:webhooktypes [{}]} {:webhooktypes [] :extra 1}))
+  (invalid webhooks/WebhookTypeList {} {:webhooktypes "x"} {:webhooktypes [{}]} {:webhooktypes [] :extra 1}))
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.webhooks))

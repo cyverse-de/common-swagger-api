@@ -100,6 +100,7 @@
   (invalid listing/AnalysisList
            {}
            {:analyses [] :timestamp "1763405834987" :total 0}
+           {:analyses "x" :timestamp "1763405834987" :total 0 :status-count []}
            {:analyses [base-analysis] :timestamp "1763405834987" :total 1 :status-count []}
            {:analyses [] :timestamp "1763405834987" :total "0" :status-count []}
            {:analyses [] :timestamp "1763405834987" :total 0 :status-count [] :extra 1}))
@@ -137,6 +138,7 @@
   (invalid listing/AnalysisStepList
            {}
            (dissoc step-list :total)
+           (assoc step-list :steps "x")
            (assoc step-list :steps [{}])
            (assoc step-list :analysis_id (str (:analysis_id step-list)))
            (assoc step-list :extra 1)))
@@ -146,6 +148,7 @@
   (invalid listing/AnalysisStatusUpdate
            {}
            (dissoc status-update :timestamp)
+           (assoc status-update :timestamp 1763405834987)
            (assoc status-update :status " ")
            (assoc status-update :extra 1)))
 
@@ -164,6 +167,7 @@
   (invalid listing/AnalysisHistory
            step-list
            (dissoc (assoc step-list :steps [step-history]) :timestamp)
+           (assoc step-list :steps "x")
            (assoc step-list :steps [{}])
            (assoc step-list :steps [step-history] :extra 1)))
 

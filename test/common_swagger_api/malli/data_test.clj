@@ -24,7 +24,7 @@
 
 (deftest Paths
   (valid data/Paths paths {:paths ["/example/home/username/foo.txt"]})
-  (invalid data/Paths {} {:paths []} {:paths [" "]} (assoc paths :extra 1)))
+  (invalid data/Paths {} {:paths "x"} {:paths []} {:paths [" "]} (assoc paths :extra 1)))
 
 (deftest OptionalPaths
   (valid data/OptionalPaths {} paths {:paths []})
@@ -32,11 +32,11 @@
 
 (deftest DataIds
   (valid data/DataIds ids {:ids []})
-  (invalid data/DataIds {} {:ids [(str data-id)]} (assoc ids :extra 1)))
+  (invalid data/DataIds {} {:ids "x"} {:ids [(str data-id)]} (assoc ids :extra 1)))
 
 (deftest OptionalPathsOrDataIds
   (valid data/OptionalPathsOrDataIds {} paths ids (merge paths ids))
-  (invalid data/OptionalPathsOrDataIds {:ids [(str data-id)]} {:paths [" "]} (assoc ids :extra 1)))
+  (invalid data/OptionalPathsOrDataIds {:ids "x"} {:ids [(str data-id)]} {:paths [" "]} (assoc ids :extra 1)))
 
 (deftest ValidFolderListingSortFields
   (is (= #{:datecreated :datemodified :name :path :size} data/ValidFolderListingSortFields)))
