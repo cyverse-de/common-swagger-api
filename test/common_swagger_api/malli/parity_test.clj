@@ -1,76 +1,92 @@
 (ns common-swagger-api.malli.parity-test
   (:require
+   [clojure.java.io :as io]
    [clojure.set :as set]
+   [clojure.string :as string]
    [clojure.test :refer [deftest is]]
    [malli.core :as m]
    [schema.core :as s]))
 
-;; compojure-api re-exports and plumatic-only helpers that have no Malli twin.
+;; compojure-api re-exports and plumatic-only helpers that have no Malli twin. These live in the core namespace, so
+;; they are the exclusions for that namespace alone.
 (def core-exclusions
   '#{api defapi describe swagger-routes routes defroutes undocumented middleware context
      GET ANY HEAD PATCH DELETE OPTIONS POST PUT
      ->optional-param copy-json-schema-meta optional-key->keyword SortFieldOptionalKey ->DocOnly map->DocOnly})
 
 ;; Per-namespace exclusions: coerce-* middleware, plumatic optional-key vars, and key filters with no Malli twin.
-(def rows
-  '[[common-swagger-api.schema common-swagger-api.malli #{}]
-    [common-swagger-api.schema.analyses common-swagger-api.malli.analyses
-     #{coerce-analysis-submission-requirements}]
-    [common-swagger-api.schema.analyses.listing common-swagger-api.malli.analyses.listing
-     #{OptionalKeyFilter}]
-    [common-swagger-api.schema.apps common-swagger-api.malli.apps
-     #{OptionalDebugKey OptionalDeprecatedKey OptionalGroupsKey OptionalParameterArgumentsKey
-       OptionalParametersKey OptionalToolsKey}]
-    ;; AppSubsetOptionalKey is a plumatic optional-key var; the Malli twin writes the entry inline.
-    [common-swagger-api.schema.apps.admin.apps common-swagger-api.malli.apps.admin.apps #{AppSubsetOptionalKey}]
-    [common-swagger-api.schema.apps.admin.categories common-swagger-api.malli.apps.admin.categories #{}]
-    [common-swagger-api.schema.apps.admin.reference-genomes common-swagger-api.malli.apps.admin.reference-genomes
-     #{}]
-    [common-swagger-api.schema.apps.bootstrap common-swagger-api.malli.apps.bootstrap #{}]
-    [common-swagger-api.schema.apps.categories common-swagger-api.malli.apps.categories #{}]
-    [common-swagger-api.schema.apps.communities common-swagger-api.malli.apps.communities #{}]
-    [common-swagger-api.schema.apps.elements common-swagger-api.malli.apps.elements #{}]
-    [common-swagger-api.schema.apps.metadata common-swagger-api.malli.apps.metadata #{}]
-    [common-swagger-api.schema.apps.permission common-swagger-api.malli.apps.permission #{}]
-    [common-swagger-api.schema.apps.pipeline common-swagger-api.malli.apps.pipeline #{}]
-    [common-swagger-api.schema.apps.rating common-swagger-api.malli.apps.rating #{}]
-    [common-swagger-api.schema.apps.reference-genomes common-swagger-api.malli.apps.reference-genomes #{}]
-    [common-swagger-api.schema.apps.workspace common-swagger-api.malli.apps.workspace #{}]
-    [common-swagger-api.schema.callbacks common-swagger-api.malli.callbacks #{}]
-    [common-swagger-api.schema.common common-swagger-api.malli.common #{}]
-    [common-swagger-api.schema.containers common-swagger-api.malli.containers
-     #{coerce-settings-long-values DevicesParamOptional PortsParamOptional ProxySettingsParamOptional
-       VolumesFromParamOptional VolumesParamOptional}]
-    [common-swagger-api.schema.data common-swagger-api.malli.data #{}]
-    [common-swagger-api.schema.data.exists common-swagger-api.malli.data.exists #{}]
-    [common-swagger-api.schema.data.navigation common-swagger-api.malli.data.navigation #{}]
-    ;; ModeParamOptionalKey is a plumatic optional-key var; the Malli twin writes the entry inline.
-    [common-swagger-api.schema.data.tickets common-swagger-api.malli.data.tickets #{ModeParamOptionalKey}]
-    [common-swagger-api.schema.filetypes common-swagger-api.malli.filetypes #{}]
-    [common-swagger-api.schema.groups common-swagger-api.malli.groups #{}]
-    [common-swagger-api.schema.integration-data common-swagger-api.malli.integration-data #{}]
-    [common-swagger-api.schema.metadata common-swagger-api.malli.metadata #{}]
-    [common-swagger-api.schema.metadata.comments common-swagger-api.malli.metadata.comments #{}]
-    [common-swagger-api.schema.metadata.tags common-swagger-api.malli.metadata.tags #{}]
-    [common-swagger-api.schema.oauth common-swagger-api.malli.oauth #{}]
-    [common-swagger-api.schema.ontologies common-swagger-api.malli.ontologies #{}]
-    [common-swagger-api.schema.permanent-id-requests common-swagger-api.malli.permanent-id-requests #{}]
-    [common-swagger-api.schema.quicklaunches common-swagger-api.malli.quicklaunches #{}]
-    [common-swagger-api.schema.sessions common-swagger-api.malli.sessions #{}]
-    [common-swagger-api.schema.stats common-swagger-api.malli.stats #{}]
-    [common-swagger-api.schema.subjects common-swagger-api.malli.subjects #{}]
-    [common-swagger-api.schema.tools common-swagger-api.malli.tools
-     #{coerce-tool-import-requests coerce-tool-list-import-request}]
-    [common-swagger-api.schema.tools.admin common-swagger-api.malli.tools.admin #{}]
-    [common-swagger-api.schema.webhooks common-swagger-api.malli.webhooks #{}]])
+;; Everything else is derived from the schema source files, so a new schema namespace without a Malli twin fails.
+(def exclusions
+  '{common-swagger-api.schema.analyses
+    #{coerce-analysis-submission-requirements}
 
-(defn- public-names [ns-sym]
-  (require ns-sym)
-  (set (keys (ns-publics ns-sym))))
+    common-swagger-api.schema.analyses.listing
+    #{OptionalKeyFilter}
+
+    common-swagger-api.schema.apps
+    #{OptionalDebugKey OptionalDeprecatedKey OptionalGroupsKey OptionalParameterArgumentsKey
+      OptionalParametersKey OptionalToolsKey}
+
+    ;; AppSubsetOptionalKey is a plumatic optional-key var; the Malli twin writes the entry inline.
+    common-swagger-api.schema.apps.admin.apps
+    #{AppSubsetOptionalKey}
+
+    common-swagger-api.schema.containers
+    #{coerce-settings-long-values DevicesParamOptional PortsParamOptional ProxySettingsParamOptional
+      VolumesFromParamOptional VolumesParamOptional}
+
+    ;; ModeParamOptionalKey is a plumatic optional-key var; the Malli twin writes the entry inline.
+    common-swagger-api.schema.data.tickets
+    #{ModeParamOptionalKey}
+
+    common-swagger-api.schema.tools
+    #{coerce-tool-import-requests coerce-tool-list-import-request}})
+
+(defn- path->ns
+  "The namespace symbol for a source path relative to the source root."
+  [path]
+  (-> path
+      (string/replace #"\.clj$" "")
+      (string/replace "/" ".")
+      (string/replace "_" "-")
+      symbol))
+
+(defn- ns->path
+  [ns-sym]
+  (str (string/replace (string/replace (str ns-sym) "-" "_") "." "/") ".clj"))
+
+(defn- schema-namespaces
+  "Every namespace under the plumatic schema directory, read off the source tree."
+  []
+  (->> (file-seq (io/file "src" "common_swagger_api" "schema"))
+       (filter #(.isFile ^java.io.File %))
+       (map #(.getPath ^java.io.File %))
+       (filter #(string/ends-with? % ".clj"))
+       (map #(path->ns (string/replace % #"^src/" "")))
+       sort))
+
+(defn- malli-twin
+  [ns-sym]
+  (symbol (string/replace (str ns-sym) #"^common-swagger-api\.schema\." "common-swagger-api.malli.")))
+
+(def rows
+  (into [['common-swagger-api.schema 'common-swagger-api.malli core-exclusions]]
+        (map (fn [ns-sym] [ns-sym (malli-twin ns-sym) (get exclusions ns-sym #{})]))
+        (schema-namespaces)))
+
+(defn- public-names
+  "The public var names in a namespace, or nil if the namespace has no source file."
+  [ns-sym]
+  (when (io/resource (ns->path ns-sym))
+    (require ns-sym)
+    (set (keys (ns-publics ns-sym)))))
 
 (deftest every-schema-def-has-a-malli-twin
-  (doseq [[schema-ns malli-ns excluded] rows]
-    (let [missing (set/difference (public-names schema-ns) core-exclusions excluded (public-names malli-ns))]
+  (is (< 1 (count rows)) "no plumatic schema namespaces were found")
+  (doseq [[schema-ns malli-ns excluded] rows
+          :let [malli-names (public-names malli-ns)]]
+    (is (some? malli-names) (str malli-ns " does not exist"))
+    (let [missing (set/difference (public-names schema-ns) excluded (or malli-names #{}))]
       (is (empty? missing) (str malli-ns " is missing " (sort missing))))))
 
 (defn- plumatic-map
@@ -115,7 +131,8 @@
 
 (deftest map-schemas-have-the-same-keys
   (doseq [[schema-ns malli-ns excluded] rows
-          :let [shared (set/difference (set/intersection (public-names schema-ns) (public-names malli-ns))
-                                       core-exclusions excluded)]
+          :let [shared (set/difference (set/intersection (public-names schema-ns)
+                                                         (or (public-names malli-ns) #{}))
+                                       excluded)]
           sym (sort shared)]
     (compare-map-keys (str malli-ns "/" sym) [] @(ns-resolve schema-ns sym) @(ns-resolve malli-ns sym) #{})))
