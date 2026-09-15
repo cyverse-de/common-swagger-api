@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.containers :as containers]
-   [common-swagger-api.malli.test-util :refer [decodes invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [decodes examples-valid invalid json-schema-ok valid]]))
 
 (def container-id #uuid "123e4567-e89b-12d3-a456-426614174000")
 (def image-id #uuid "456e7890-b12c-34d5-e678-901234567890")
@@ -123,3 +123,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.containers))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.containers))

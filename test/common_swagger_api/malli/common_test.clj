@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.common :as common]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (deftest IncludeHiddenParams
   (valid common/IncludeHiddenParams {} {:include-hidden true} {:include-hidden false})
@@ -14,3 +14,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.common))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.common))

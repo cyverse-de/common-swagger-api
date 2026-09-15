@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.apps.bootstrap :as bootstrap]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def system-ids {:de_system_id "de" :all_system_ids ["de" "tapis"]})
 
@@ -44,3 +44,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.apps.bootstrap))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.apps.bootstrap))

@@ -12,7 +12,7 @@
 
    [:id
     {:description         "The AVU's UUID"
-     :json-schema/example "70fc1080-3152-4c09-92b0-f5b9cc70088b"}
+     :json-schema/example #uuid "70fc1080-3152-4c09-92b0-f5b9cc70088b"}
     :uuid]
 
    [:attr
@@ -32,7 +32,7 @@
 
    [:target_id
     {:description         "The target item's UUID"
-     :json-schema/example "a14dfe49-f65f-418b-b3c5-6497284251fe"}
+     :json-schema/example #uuid "a14dfe49-f65f-418b-b3c5-6497284251fe"}
     :uuid]
 
    [:created_by
@@ -120,7 +120,7 @@
    [:target-id
     {:optional            true
      :description         "Target IDs to search for."
-     :json-schema/example ["123e4567-e89b-12d3-a456-426614174000"]}
+     :json-schema/example [#uuid "123e4567-e89b-12d3-a456-426614174000"]}
     [:vector :uuid]]])
 
 (def DataTypes ["file" "folder"])

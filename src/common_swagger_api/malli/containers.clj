@@ -14,7 +14,7 @@
 
    [:id
     {:description         "The unique identifier for the image"
-     :json-schema/example "123e4567-e89b-12d3-a456-426614174000"}
+     :json-schema/example #uuid "123e4567-e89b-12d3-a456-426614174000"}
     :uuid]
 
    [:tag
@@ -156,7 +156,7 @@
 
    [:id
     {:description         "The unique identifier for the container settings"
-     :json-schema/example "123e4567-e89b-12d3-a456-426614174000"}
+     :json-schema/example #uuid "123e4567-e89b-12d3-a456-426614174000"}
     :uuid]])
 
 (def NewSettings
@@ -181,7 +181,7 @@
 
    [:id
     {:description         "The unique identifier for the device"
-     :json-schema/example "123e4567-e89b-12d3-a456-426614174000"}
+     :json-schema/example #uuid "123e4567-e89b-12d3-a456-426614174000"}
     :uuid]])
 
 (def NewDevice
@@ -206,7 +206,7 @@
 
    [:id
     {:description         "The unique identifier for the volume"
-     :json-schema/example "123e4567-e89b-12d3-a456-426614174000"}
+     :json-schema/example #uuid "123e4567-e89b-12d3-a456-426614174000"}
     :uuid]])
 
 (def NewVolume
@@ -220,7 +220,7 @@
        [:map
         [:id
          {:description         "The unique identifier for the data container"
-          :json-schema/example "123e4567-e89b-12d3-a456-426614174000"}
+          :json-schema/example #uuid "123e4567-e89b-12d3-a456-426614174000"}
          :uuid]
 
         [:name_prefix
@@ -250,7 +250,7 @@
 
    [:id
     {:description         "The unique identifier for the port configuration"
-     :json-schema/example "123e4567-e89b-12d3-a456-426614174000"}
+     :json-schema/example #uuid "123e4567-e89b-12d3-a456-426614174000"}
     :uuid]
 
    [:host_port
@@ -282,7 +282,7 @@
 
    [:id
     {:description         "The unique identifier for the proxy settings"
-     :json-schema/example "123e4567-e89b-12d3-a456-426614174000"}
+     :json-schema/example #uuid "123e4567-e89b-12d3-a456-426614174000"}
     :uuid]
 
    [:image

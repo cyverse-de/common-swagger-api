@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.ontologies :as ontologies]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def target-id #uuid "cdff6d22-5634-4ad5-92f6-ffc4cee9ad05")
 
@@ -70,3 +70,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.ontologies))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.ontologies))

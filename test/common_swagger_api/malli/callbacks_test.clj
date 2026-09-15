@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.callbacks :as callbacks]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def agave-params
   {:status      "STAGING_INPUTS"
@@ -46,3 +46,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.callbacks))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.callbacks))

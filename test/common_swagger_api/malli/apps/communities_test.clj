@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.apps.communities :as communities]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def community-id "1a0b4e0c5d2f4e8ba4f9c3d2e1b0a987")
 
@@ -26,3 +26,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.apps.communities))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.apps.communities))

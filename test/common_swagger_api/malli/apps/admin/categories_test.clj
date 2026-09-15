@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.apps.admin.categories :as admin-categories]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def category-id
   {:system_id "de"
@@ -40,3 +40,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.apps.admin.categories))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.apps.admin.categories))

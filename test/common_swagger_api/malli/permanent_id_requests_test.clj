@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.permanent-id-requests :as pid]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]
    [malli.json-schema :as js]))
 
 (def request-id #uuid "18c3c84d-38ca-45a6-96d4-38541bf764b3")
@@ -144,3 +144,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.permanent-id-requests))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.permanent-id-requests))

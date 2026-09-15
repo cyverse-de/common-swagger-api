@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.apps.permission :as permission]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]
    [malli.json-schema :as js]))
 
 (def subject {:id "user123" :source_id "ldap"})
@@ -388,3 +388,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.apps.permission))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.apps.permission))

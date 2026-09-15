@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.subjects :as subjects]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def base-subject {:id "user123" :source_id "ldap"})
 
@@ -43,3 +43,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.subjects))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.subjects))

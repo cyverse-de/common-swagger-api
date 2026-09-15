@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.filetypes :as filetypes]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (deftest ValidInfoTypes
   (is (every? (set filetypes/ValidInfoTypes) ["fasta" "csv" "unknown"]))
@@ -33,3 +33,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.filetypes))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.filetypes))

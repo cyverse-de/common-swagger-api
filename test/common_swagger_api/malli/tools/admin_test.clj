@@ -1,7 +1,7 @@
 (ns common-swagger-api.malli.tools.admin-test
   (:require
    [clojure.test :refer [deftest is]]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]
    [common-swagger-api.malli.tools :as tools]
    [common-swagger-api.malli.tools.admin :as admin]))
 
@@ -118,3 +118,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.tools.admin))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.tools.admin))

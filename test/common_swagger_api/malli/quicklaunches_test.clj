@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.quicklaunches :as quicklaunches]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def submission
   {:system_id  "de"
@@ -127,3 +127,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.quicklaunches))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.quicklaunches))

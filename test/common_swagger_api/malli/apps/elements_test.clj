@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.apps.elements :as elements]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def data-source
   {:id          #uuid "123e4567-e89b-12d3-a456-426614174000"
@@ -137,3 +137,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.apps.elements))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.apps.elements))

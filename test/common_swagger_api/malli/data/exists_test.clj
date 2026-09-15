@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.data.exists :as exists]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]
    [malli.json-schema :as js]))
 
 (def existence-map
@@ -62,3 +62,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.data.exists))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.data.exists))

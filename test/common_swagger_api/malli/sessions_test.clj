@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.sessions :as sessions]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def login-time 1763768830001)
 
@@ -47,3 +47,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.sessions))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.sessions))

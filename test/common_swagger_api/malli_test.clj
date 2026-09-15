@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [are deftest is]]
    [common-swagger-api.malli :as m]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]
    [malli.core :as malli]
    [malli.json-schema :as js]
    [malli.util :as mu]))
@@ -76,3 +76,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli))

@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.metadata.comments :as comments]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def comment-id #uuid "4a1d5f6c-3f9b-4b1e-9a2f-5d6c7e8f9a0b")
 (def target-id #uuid "a14dfe49-f65f-418b-b3c5-6497284251fe")
@@ -90,3 +90,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.metadata.comments))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.metadata.comments))

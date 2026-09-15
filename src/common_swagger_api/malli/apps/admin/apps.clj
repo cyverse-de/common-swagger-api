@@ -138,8 +138,9 @@
       (mu/merge
        [:map {:closed true}
         [:sort-field
-         {:description SortFieldDocs
-          :optional    true}
+         {:optional            true
+          :description         SortFieldDocs
+          :json-schema/example :name}
          (into [:enum] AdminAppSearchValidSortFields)]
 
         [:app-subset

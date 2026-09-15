@@ -3,7 +3,7 @@
    [clojure.string :as string]
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.metadata.tags :as tags]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]
    [malli.json-schema :as js]))
 
 (def tag-id #uuid "8c0e5a9b-2f34-4f0a-9c1d-7b6e5f4a3c2d")
@@ -180,3 +180,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.metadata.tags))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.metadata.tags))

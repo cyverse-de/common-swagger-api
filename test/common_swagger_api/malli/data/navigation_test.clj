@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.data.navigation :as navigation]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def base-paths
   {:user_home_path  "/iplant/home/janedoe"
@@ -94,3 +94,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.data.navigation))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.data.navigation))

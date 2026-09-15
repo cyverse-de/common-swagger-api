@@ -2,7 +2,8 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.apps.admin.apps :as admin-apps]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]
+   [malli.json-schema :as js]))
 
 (def job-stats
   {:job_count_completed 42
@@ -104,7 +105,8 @@
            {:sort-field :nope}
            {:app-subset :none}
            {:app-subset "public"}
-           {:extra 1}))
+           {:extra 1})
+  (is (= :name (get-in (js/transform admin-apps/AdminAppSearchParams) [:properties :sort-field :example]))))
 
 (deftest AppExtraInfo
   (valid admin-apps/AppExtraInfo extra-info)
@@ -166,3 +168,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.apps.admin.apps))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.apps.admin.apps))

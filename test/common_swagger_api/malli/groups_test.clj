@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest]]
    [common-swagger-api.malli.groups :as groups]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
 
 (def base-value {:name "example-group" :type "group"})
 
@@ -164,3 +164,6 @@
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli.groups))
+
+(deftest examples
+  (examples-valid 'common-swagger-api.malli.groups))
