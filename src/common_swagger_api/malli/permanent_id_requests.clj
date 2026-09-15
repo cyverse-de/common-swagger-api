@@ -175,7 +175,7 @@
       :json-schema/example 27}
      :int]]))
 
-(def ValidPermanentIDRequestListPagingParams
+(def ValidPermanentIDRequestListSortFields
   [:enum :type :target_type :requested_by :date_submitted :status :date_updated :updated_by])
 
 (def PermanentIDRequestListPagingParams
@@ -186,12 +186,12 @@
      [:sort-field
       {:optional    true
        :description SortFieldDocs}
-      ValidPermanentIDRequestListPagingParams]
+      ValidPermanentIDRequestListSortFields]
 
      [:statuses
       {:optional            true
        :description         "Status Codes with which to filter results"
-       :json-schema/example "Rejected"}
+       :json-schema/example ["Rejected"]}
       [:vector :string]]])))
 
 (def PermanentIDRequestStatusCode
@@ -214,10 +214,10 @@
 
 (def PermanentIDRequestStatusCodeList
   (mu/closed-schema
-    [:map
-     [:status_codes
-      {:description "A list of Permanent ID Request Status Codes"}
-      [:vector PermanentIDRequestStatusCode]]]))
+   [:map
+    [:status_codes
+     {:description "A list of Permanent ID Request Status Codes"}
+     [:vector PermanentIDRequestStatusCode]]]))
 
 (def PermanentIDRequestType
   (mu/closed-schema
@@ -239,7 +239,7 @@
 
 (def PermanentIDRequestTypeList
   (mu/closed-schema
-    [:map
-     [:request_types
-      {:description "A list of Permanent ID Request Types"}
-      [:vector PermanentIDRequestType]]]))
+   [:map
+    [:request_types
+     {:description "A list of Permanent ID Request Types"}
+     [:vector PermanentIDRequestType]]]))

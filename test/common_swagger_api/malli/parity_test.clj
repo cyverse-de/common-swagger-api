@@ -40,8 +40,7 @@
     [common-swagger-api.schema.metadata common-swagger-api.malli.metadata #{}]
     [common-swagger-api.schema.oauth common-swagger-api.malli.oauth #{}]
     [common-swagger-api.schema.ontologies common-swagger-api.malli.ontologies #{}]
-    [common-swagger-api.schema.permanent-id-requests common-swagger-api.malli.permanent-id-requests
-     #{ValidPermanentIDRequestListSortFields}]                               ; pending Task 12
+    [common-swagger-api.schema.permanent-id-requests common-swagger-api.malli.permanent-id-requests #{}]
     [common-swagger-api.schema.quicklaunches common-swagger-api.malli.quicklaunches #{}]
     [common-swagger-api.schema.sessions common-swagger-api.malli.sessions #{}]
     [common-swagger-api.schema.stats common-swagger-api.malli.stats
