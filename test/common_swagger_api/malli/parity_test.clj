@@ -21,9 +21,7 @@
        OptionalParametersKey OptionalToolsKey}]
     [common-swagger-api.schema.apps.bootstrap common-swagger-api.malli.apps.bootstrap #{}]
     [common-swagger-api.schema.apps.categories common-swagger-api.malli.apps.categories #{}]
-    [common-swagger-api.schema.apps.communities common-swagger-api.malli.apps.communities
-     #{AppCommunityAddDocs AppCommunityAddSummary AppCommunityDeleteDocs AppCommunityDeleteSummary
-       AppCommunityListRequest CommunityIdPathParam}]                        ; pending Task 10
+    [common-swagger-api.schema.apps.communities common-swagger-api.malli.apps.communities #{}]
     [common-swagger-api.schema.apps.elements common-swagger-api.malli.apps.elements #{}]
     [common-swagger-api.schema.apps.metadata common-swagger-api.malli.apps.metadata #{}]
     [common-swagger-api.schema.apps.permission common-swagger-api.malli.apps.permission

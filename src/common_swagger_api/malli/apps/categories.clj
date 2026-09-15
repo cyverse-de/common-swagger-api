@@ -1,10 +1,6 @@
 (ns common-swagger-api.malli.apps.categories
   (:require
-   [common-swagger-api.malli.apps
-    :refer [AppCategoryIdPathParam AppListingDetail AppListingPagingParams
-            SystemId]]
-   [common-swagger-api.malli.ontologies
-    :refer [OntologyHierarchyFilterParams]]
+   [common-swagger-api.malli.apps :refer [AppCategoryIdPathParam AppListingDetail SystemId]]
    [malli.core :as m]
    [malli.util :as mu]))
 
@@ -132,6 +128,3 @@
       [:apps
        {:description "A listing of Apps under this Category"}
        [:vector AppListingDetail]]])))
-
-(def OntologyAppListingPagingParams
-  (mu/closed-schema (mu/merge AppListingPagingParams OntologyHierarchyFilterParams)))

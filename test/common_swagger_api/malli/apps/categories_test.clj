@@ -1,135 +1,86 @@
 (ns common-swagger-api.malli.apps.categories-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [common-swagger-api.malli.apps.categories :as c]
-            [malli.core :as malli]))
+  (:require
+   [clojure.test :refer [deftest]]
+   [common-swagger-api.malli.apps.categories :as categories]
+   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
 
-(defn valid? [schema data]
-  (malli/validate schema data))
+(def category-id
+  {:system_id "de"
+   :id        #uuid "123e4567-e89b-12d3-a456-426614174000"})
 
-(deftest test-CategoryListingParams
-  (testing "CategoryListingParams validation"
-    (is (valid? c/CategoryListingParams {}))
-    (is (valid? c/CategoryListingParams {:public true}))
-    (is (valid? c/CategoryListingParams {:public false}))
-    (is (not (valid? c/CategoryListingParams {:public "not-a-boolean"})))
-    (is (not (valid? c/CategoryListingParams {:extra-field "not-allowed"})))))
+(def category-base (assoc category-id :name "Genome Sequencing"))
 
-(deftest test-AppCategoryId
-  (testing "AppCategoryId validation"
-    (is (valid? c/AppCategoryId
-                {:system_id "de"
-                 :id #uuid "123e4567-e89b-12d3-a456-426614174000"}))
-    (is (not (valid? c/AppCategoryId {})))
-    (is (not (valid? c/AppCategoryId {:id #uuid "123e4567-e89b-12d3-a456-426614174000"})))
-    (is (not (valid? c/AppCategoryId {:system_id "de"})))
-    (is (not (valid? c/AppCategoryId {:system_id "de"
-                                       :id "not-a-uuid"})))
-    (is (not (valid? c/AppCategoryId {:system_id "de"
-                                       :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                                       :extra-field "not-allowed"})))))
+(def category (assoc category-base :total 42 :is_public true))
 
-(deftest test-AppCategoryBase
-  (testing "AppCategoryBase validation"
-    (is (valid? c/AppCategoryBase
-                {:system_id "de"
-                 :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                 :name "Genome Sequencing"}))
-    (is (not (valid? c/AppCategoryBase {})))
-    (is (not (valid? c/AppCategoryBase {:system_id "de"
-                                         :id #uuid "123e4567-e89b-12d3-a456-426614174000"})))
-    (is (not (valid? c/AppCategoryBase {:system_id "de"
-                                         :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                                         :name "Genome Sequencing"
-                                         :extra-field "not-allowed"})))))
+(def subcategory
+  {:system_id "de"
+   :id        #uuid "987e6543-e21b-42c1-b456-426614174000"
+   :name      "Sub Category"
+   :total     10
+   :is_public false})
 
-(deftest test-AppCategory
-  (testing "AppCategory validation"
-    (testing "valid category without children"
-      (is (valid? c/AppCategory
-                  {:system_id "de"
-                   :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                   :name "Genome Sequencing"
-                   :total 42
-                   :is_public true})))
+(def listing-detail
+  {:id                   "app-id-123"
+   :name                 "BLAST"
+   :description          "Basic sequence alignment"
+   :app_type             "DE"
+   :can_favor            true
+   :can_rate             true
+   :can_run              true
+   :deleted              false
+   :disabled             false
+   :integrator_email     "user@example.org"
+   :integrator_name      "Test User"
+   :is_public            true
+   :pipeline_eligibility {:is_valid true :reason ""}
+   :rating               {:average 4.5 :total 42}
+   :step_count           1
+   :permission           "own"})
 
-    (testing "valid category with children"
-      (is (valid? c/AppCategory
-                  {:system_id "de"
-                   :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                   :name "Genome Sequencing"
-                   :total 42
-                   :is_public true
-                   :categories [{:system_id "de"
-                                 :id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                                 :name "Sub Category"
-                                 :total 10
-                                 :is_public false}]})))
+(deftest CategoryListingParams
+  (valid categories/CategoryListingParams {} {:public true} {:public false})
+  (invalid categories/CategoryListingParams {:public "yes"} {:extra 1}))
 
-    (testing "invalid category"
-      (is (not (valid? c/AppCategory {})))
-      (is (not (valid? c/AppCategory {:system_id "de"
-                                       :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                                       :name "Genome Sequencing"})))
-      (is (not (valid? c/AppCategory {:system_id "de"
-                                       :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                                       :name "Genome Sequencing"
-                                       :total "not-a-number"
-                                       :is_public true})))
-      (is (not (valid? c/AppCategory {:system_id "de"
-                                       :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                                       :name "Genome Sequencing"
-                                       :total 42
-                                       :is_public "not-a-boolean"})))
-      (is (not (valid? c/AppCategory {:system_id "de"
-                                       :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                                       :name "Genome Sequencing"
-                                       :total 42
-                                       :is_public true
-                                       :extra-field "not-allowed"}))))))
+(deftest AppCategoryId
+  (valid categories/AppCategoryId category-id)
+  (invalid categories/AppCategoryId
+           {}
+           (dissoc category-id :system_id)
+           (assoc category-id :id "not-a-uuid")
+           (assoc category-id :extra 1)))
 
-(deftest test-AppCategoryListing
-  (testing "AppCategoryListing validation"
-    (is (valid? c/AppCategoryListing {:categories []}))
-    (is (valid? c/AppCategoryListing
-                {:categories [{:system_id "de"
-                               :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                               :name "Genome Sequencing"
-                               :total 42
-                               :is_public true}]}))
-    (is (not (valid? c/AppCategoryListing {})))
-    (is (not (valid? c/AppCategoryListing {:categories "not-a-vector"})))))
+(deftest AppCategoryBase
+  (valid categories/AppCategoryBase category-base)
+  (invalid categories/AppCategoryBase
+           {}
+           category-id
+           (assoc category-base :name 1)
+           (assoc category-base :extra 1)))
 
-(deftest test-AppCategoryAppListing
-  (testing "AppCategoryAppListing validation"
-    (let [base-category {:system_id "de"
-                         :id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                         :name "Genome Sequencing"
-                         :total 42
-                         :is_public true}]
-      (testing "valid with empty apps"
-        (is (valid? c/AppCategoryAppListing (assoc base-category :apps []))))
+(deftest AppCategory
+  (valid categories/AppCategory category (assoc category :categories [subcategory])
+         (assoc category :categories [(assoc subcategory :categories [])]))
+  (invalid categories/AppCategory
+           {}
+           category-base
+           (assoc category :total "42")
+           (assoc category :is_public "yes")
+           (assoc category :categories [{}])
+           (assoc category :extra 1)))
 
-      (testing "categories field not allowed"
-        (is (not (valid? c/AppCategoryAppListing
-                         (assoc base-category :apps [] :categories [])))))
+(deftest AppCategoryListing
+  (valid categories/AppCategoryListing {:categories []} {:categories [category]})
+  (invalid categories/AppCategoryListing {} {:categories [{}]} {:categories category}
+           {:categories [] :extra 1}))
 
-      (testing "apps field required"
-        (is (not (valid? c/AppCategoryAppListing base-category))))
+(deftest AppCategoryAppListing
+  (valid categories/AppCategoryAppListing (assoc category :apps []) (assoc category :apps [listing-detail]))
+  (invalid categories/AppCategoryAppListing
+           {}
+           category
+           {:apps []}
+           (assoc category :apps [] :categories [])
+           (assoc category :apps [{}])))
 
-      (testing "missing required fields"
-        (is (not (valid? c/AppCategoryAppListing {:apps []})))))))
-
-(deftest test-OntologyAppListingPagingParams
-  (testing "OntologyAppListingPagingParams validation"
-    (is (valid? c/OntologyAppListingPagingParams
-                {:attr "cyverse_avus.ontology_iris"}))
-    (is (valid? c/OntologyAppListingPagingParams
-                {:attr "cyverse_avus.ontology_iris"
-                 :limit 50
-                 :offset 0
-                 :sort-field :name
-                 :sort-dir "ASC"}))
-    (is (not (valid? c/OntologyAppListingPagingParams {})))
-    (is (not (valid? c/OntologyAppListingPagingParams
-                     {:attr "cyverse_avus.ontology_iris"
-                      :extra-field "not-allowed"})))))
+(deftest json-schema
+  (json-schema-ok 'common-swagger-api.malli.apps.categories))
