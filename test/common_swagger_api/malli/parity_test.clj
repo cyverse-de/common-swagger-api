@@ -42,6 +42,7 @@
      #{coerce-settings-long-values DevicesParamOptional PortsParamOptional ProxySettingsParamOptional
        VolumesFromParamOptional VolumesParamOptional}]
     [common-swagger-api.schema.data common-swagger-api.malli.data #{}]
+    [common-swagger-api.schema.data.exists common-swagger-api.malli.data.exists #{}]
     [common-swagger-api.schema.filetypes common-swagger-api.malli.filetypes #{}]
     [common-swagger-api.schema.groups common-swagger-api.malli.groups #{}]
     [common-swagger-api.schema.integration-data common-swagger-api.malli.integration-data #{}]
