@@ -509,12 +509,11 @@
     :int]])
 
 (def ErrorPrivateToolRequestBadParam
-  (mu/assoc ErrorResponse :error_code
-            [:enum
+  (mu/assoc ErrorResponse
+            [:error_code
              {:description         "Exists or Bad Field error code"
-              :json-schema/example ce/ERR_EXISTS}
-             ce/ERR_EXISTS
-             ce/ERR_BAD_OR_MISSING_FIELD]))
+              :json-schema/example ce/ERR_EXISTS}]
+            [:enum ce/ERR_EXISTS ce/ERR_BAD_OR_MISSING_FIELD]))
 
 (def PrivateToolImportResponse400
   {:body        ErrorPrivateToolRequestBadParam

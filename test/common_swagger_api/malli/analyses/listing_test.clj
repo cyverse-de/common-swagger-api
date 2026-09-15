@@ -58,7 +58,10 @@
   (invalid listing/ExternalId " " nil))
 
 (deftest BatchStatus
-  (valid listing/BatchStatus batch-status (assoc batch-status :running 0))
+  (valid listing/BatchStatus
+         batch-status
+         (assoc batch-status :running 0)
+         (assoc batch-status :running -1))
   (invalid listing/BatchStatus
            {}
            (dissoc batch-status :submitted)

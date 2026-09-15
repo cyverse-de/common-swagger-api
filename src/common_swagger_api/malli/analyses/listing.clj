@@ -74,22 +74,22 @@
     [:total
      {:description         "The total number of jobs in the batch."
       :json-schema/example 42}
-     [:int {:min 0}]]
+     :int]
 
     [:completed
      {:description         "The number of completed jobs in the batch."
       :json-schema/example 39}
-     [:int {:min 0}]]
+     :int]
 
     [:running
      {:description         "The number of running jobs in the batch."
       :json-schema/example 2}
-     [:int {:min 0}]]
+     :int]
 
     [:submitted
      {:description         "The number of submitted jobs in the batch."
       :json-schema/example 1}
-     [:int {:min 0}]]]))
+     :int]]))
 
 (def BaseAnalysis
   (mu/closed-schema

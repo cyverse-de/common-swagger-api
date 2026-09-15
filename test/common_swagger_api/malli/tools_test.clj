@@ -2,7 +2,8 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.test-util :refer [decodes invalid json-schema-ok valid]]
-   [common-swagger-api.malli.tools :as tools]))
+   [common-swagger-api.malli.tools :as tools]
+   [malli.json-schema :as js]))
 
 (def tool-id #uuid "123e4567-e89b-12d3-a456-426614174000")
 (def tool-request-id #uuid "987e6543-e21b-32c1-b456-426614174000")
@@ -322,6 +323,13 @@
          {:error_code "ERR_EXISTS"}
          {:error_code "ERR_BAD_OR_MISSING_FIELD" :reason "Deprecated image"})
   (invalid tools/ErrorPrivateToolRequestBadParam {} {:error_code "ERR_NOT_FOUND"} {:error_code "ERR_EXISTS" :extra 1}))
+
+(deftest ErrorPrivateToolRequestBadParam-json-schema
+  (is (= {:description         "Exists or Bad Field error code"
+          :type                "string"
+          :enum                ["ERR_EXISTS" "ERR_BAD_OR_MISSING_FIELD"]
+          :example             "ERR_EXISTS"}
+         (get-in (js/transform tools/ErrorPrivateToolRequestBadParam) [:properties :error_code]))))
 
 (deftest PrivateToolImportResponse400
   (is (= tools/ErrorPrivateToolRequestBadParam (:body tools/PrivateToolImportResponse400)))

@@ -11,7 +11,7 @@
      GET ANY HEAD PATCH DELETE OPTIONS POST PUT
      ->optional-param copy-json-schema-meta optional-key->keyword SortFieldOptionalKey ->DocOnly map->DocOnly})
 
-;; Per-namespace exclusions. "pending" entries are removed as tasks land.
+;; Per-namespace exclusions: coerce-* middleware, plumatic optional-key vars, and key filters with no Malli twin.
 (def rows
   '[[common-swagger-api.schema common-swagger-api.malli #{}]
     [common-swagger-api.schema.analyses common-swagger-api.malli.analyses

@@ -120,39 +120,39 @@
     NonBlankString]])
 
 (def ErrorResponseExists
-  (mu/assoc ErrorResponse :error_code
-    [:enum
-     {:description         "Exists error code"
-      :json-schema/example ce/ERR_EXISTS}
-     ce/ERR_EXISTS]))
+  (mu/assoc ErrorResponse
+            [:error_code
+             {:description         "Exists error code"
+              :json-schema/example ce/ERR_EXISTS}]
+            [:enum ce/ERR_EXISTS]))
 
 (def ErrorResponseNotWritable
-  (mu/assoc ErrorResponse :error_code
-    [:enum
-     {:description         "Not Writeable error code"
-      :json-schema/example ce/ERR_NOT_WRITEABLE}
-     ce/ERR_NOT_WRITEABLE]))
+  (mu/assoc ErrorResponse
+            [:error_code
+             {:description         "Not Writeable error code"
+              :json-schema/example ce/ERR_NOT_WRITEABLE}]
+            [:enum ce/ERR_NOT_WRITEABLE]))
 
 (def ErrorResponseForbidden
-  (mu/assoc ErrorResponse :error_code
-    [:enum
-     {:description         "Insufficient privileges error code"
-      :json-schema/example ce/ERR_FORBIDDEN}
-     ce/ERR_FORBIDDEN]))
+  (mu/assoc ErrorResponse
+            [:error_code
+             {:description         "Insufficient privileges error code"
+              :json-schema/example ce/ERR_FORBIDDEN}]
+            [:enum ce/ERR_FORBIDDEN]))
 
 (def ErrorResponseNotFound
-  (mu/assoc ErrorResponse :error_code
-    [:enum
-     {:description         "Not Found error code"
-      :json-schema/example ce/ERR_NOT_FOUND}
-     ce/ERR_NOT_FOUND]))
+  (mu/assoc ErrorResponse
+            [:error_code
+             {:description         "Not Found error code"
+              :json-schema/example ce/ERR_NOT_FOUND}]
+            [:enum ce/ERR_NOT_FOUND]))
 
 (def ErrorResponseIllegalArgument
-  (mu/assoc ErrorResponse :error_code
-    [:enum
-     {:description         "Illegal Argument error code"
-      :json-schema/example ce/ERR_ILLEGAL_ARGUMENT}
-     ce/ERR_ILLEGAL_ARGUMENT]))
+  (mu/assoc ErrorResponse
+            [:error_code
+             {:description         "Illegal Argument error code"
+              :json-schema/example ce/ERR_ILLEGAL_ARGUMENT}]
+            [:enum ce/ERR_ILLEGAL_ARGUMENT]))
 
 (def ErrorResponseUnchecked
   [:map {:closed true}

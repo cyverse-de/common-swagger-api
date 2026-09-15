@@ -44,7 +44,9 @@
 
 (deftest error-code-variants
   (are [schema code] (and (malli/validate schema {:error_code code})
-                          (not (malli/validate schema {:error_code "ERR_OTHER"})))
+                          (not (malli/validate schema {:error_code "ERR_OTHER"}))
+                          (= [code] (get-in (js/transform schema) [:properties :error_code :enum]))
+                          (= code (get-in (js/transform schema) [:properties :error_code :example])))
     m/ErrorResponseExists          "ERR_EXISTS"
     m/ErrorResponseNotWritable     "ERR_NOT_WRITEABLE"
     m/ErrorResponseForbidden       "ERR_FORBIDDEN"
