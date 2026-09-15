@@ -74,12 +74,14 @@
            {:categories [] :extra 1}))
 
 (deftest AppCategoryAppListing
-  (valid categories/AppCategoryAppListing (assoc category :apps []) (assoc category :apps [listing-detail]))
+  (valid categories/AppCategoryAppListing (assoc category :apps []) (assoc category :apps [listing-detail])
+         ;; plumatic's (dissoc AppCategory :categories) misses the optional key, so :categories is still accepted
+         (assoc category :apps [] :categories [subcategory]))
   (invalid categories/AppCategoryAppListing
            {}
            category
            {:apps []}
-           (assoc category :apps [] :categories [])
+           (assoc category :apps [] :categories [{}])
            (assoc category :apps [{}])))
 
 (deftest json-schema

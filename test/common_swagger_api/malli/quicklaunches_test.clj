@@ -632,6 +632,13 @@
                                 :notify     true
                                 :output_dir "/zone/home/janedoe/analyses"}})))
 
+    ;; st/optional-keys-schema is recursive, so the nested submission keys are optional too.
+    (testing "valid UpdateQuickLaunch with an empty submission"
+      (is (valid? ql/UpdateQuickLaunch {:submission {}})))
+
+    (testing "valid UpdateQuickLaunch with a submission holding empty nested maps"
+      (is (valid? ql/UpdateQuickLaunch {:submission {:requirements [{}] :file-metadata [{}]}})))
+
     (testing "valid UpdateQuickLaunch with all fields present (except id)"
       (is (valid? ql/UpdateQuickLaunch
                   {:name            "Updated BLAST Nucleotide Alignment"
@@ -716,16 +723,14 @@
       (is (not (valid? ql/UpdateQuickLaunch
                        {:is_public 1}))))
 
-    (testing "invalid UpdateQuickLaunch - invalid submission (missing required field)"
+    (testing "invalid UpdateQuickLaunch - submission field of the wrong type"
       (is (not (valid? ql/UpdateQuickLaunch
                        {:submission {:system_id  "de"
                                      :app_id     "007a8434-1b84-42e8-b647-4073a62b4b3b"
                                      :config     {}
-                                     :debug      false
+                                     :debug      "false"
                                      :name       "sequence-alignment"
-                                     :notify     true
-                                     ;; missing output_dir
-                                     }}))))
+                                     :notify     true}}))))
 
     (testing "invalid UpdateQuickLaunch - multiple invalid fields"
       (is (not (valid? ql/UpdateQuickLaunch

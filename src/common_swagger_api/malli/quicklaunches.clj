@@ -2,7 +2,16 @@
   (:require
    [common-swagger-api.malli :refer [NonBlankString]]
    [common-swagger-api.malli.analyses :refer [AnalysisSubmission]]
+   [malli.core :as m]
    [malli.util :as mu]))
+
+(defn- optional-keys-schema
+  "Makes every key of every map in a schema optional, the way schema-tools/optional-keys-schema does."
+  [schema]
+  (m/walk schema
+          (fn [s _ children _]
+            (let [s (m/into-schema (m/type s) (m/properties s) children (m/options s))]
+              (cond-> s (= :map (m/type s)) mu/optional-keys)))))
 
 (def QuickLaunch
   (mu/closed-schema
@@ -54,9 +63,7 @@
     (mu/optional-keys schema [:app_version_id])))
 
 (def UpdateQuickLaunch
-  (as-> QuickLaunch schema
-    (mu/dissoc schema :id)
-    (mu/optional-keys schema)))
+  (optional-keys-schema (mu/dissoc QuickLaunch :id)))
 
 (def QuickLaunchFavorite
   (mu/closed-schema
@@ -106,9 +113,7 @@
   (reduce mu/dissoc QuickLaunchUserDefault [:id :user]))
 
 (def UpdateQuickLaunchUserDefault
-  (as-> QuickLaunchUserDefault schema
-    (mu/dissoc schema :id)
-    (mu/optional-keys schema)))
+  (optional-keys-schema (mu/dissoc QuickLaunchUserDefault :id)))
 
 (def QuickLaunchGlobalDefault
   (mu/closed-schema
@@ -132,6 +137,4 @@
   (mu/dissoc QuickLaunchGlobalDefault :id))
 
 (def UpdateQuickLaunchGlobalDefault
-  (as-> QuickLaunchGlobalDefault schema
-    (mu/dissoc schema :id)
-    (mu/optional-keys schema)))
+  (optional-keys-schema (mu/dissoc QuickLaunchGlobalDefault :id)))

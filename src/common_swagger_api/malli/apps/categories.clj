@@ -103,12 +103,12 @@
      {:description "A listing of App Categories visisble to the requesting user"}
      [:vector AppCategory]]]))
 
+;; The plumatic version dissocs the plain keyword :categories, which does not match its (optional-key :categories)
+;; entry, so the key survives there. It survives here too.
 (def AppCategoryAppListing
-  (as-> AppCategory s
-    (mu/dissoc s :categories)
-    (mu/merge
-     s
-     [:map
-      [:apps
-       {:description "A listing of Apps under this Category"}
-       [:vector AppListingDetail]]])))
+  (mu/merge
+   AppCategory
+   [:map
+    [:apps
+     {:description "A listing of Apps under this Category"}
+     [:vector AppListingDetail]]]))
