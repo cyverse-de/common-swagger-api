@@ -75,7 +75,8 @@
                          [:description
                           {:optional            true
                            :description         "The description annotation of this Ontology Class"
-                           :json-schema/example "A biological process is the execution of a genetically-encoded biological module or program"}
+                           :json-schema/example (str "A biological process is the execution of a "
+                                                     "genetically-encoded biological module or program")}
                           [:maybe :string]]
 
                          [:subclasses
@@ -95,3 +96,20 @@
    [:hierarchies
     {:description "A list of Ontology Class hierarchies"}
     [:vector OntologyClassHierarchy]]])
+
+(def TargetOntologyHierarchies
+  [:map {:closed true}
+   [:id
+    {:description         "The target item's UUID"
+     :json-schema/example #uuid "cdff6d22-5634-4ad5-92f6-ffc4cee9ad05"}
+    :uuid]
+
+   [:hierarchies
+    {:description "Filtered hierarchies for this target"}
+    [:vector OntologyClassHierarchy]]])
+
+(def TargetOntologyHierarchiesList
+  [:map {:closed true}
+   [:targets
+    {:description "Per-target filtered hierarchy results"}
+    [:vector TargetOntologyHierarchies]]])

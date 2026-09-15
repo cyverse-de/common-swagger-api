@@ -47,8 +47,7 @@
        GetAccessCodeDescription GetAccessCodeSummary GetRedirectUrisDescription GetRedirectUrisSummary
        GetTokenInfoDescription GetTokenInfoSummary OAuthCallbackQueryParams OAuthCallbackResponse
        RedirectUris RedirectUrisDoc TokenInfo TokenInfoProxyParams}]         ; pending Task 9
-    [common-swagger-api.schema.ontologies common-swagger-api.malli.ontologies
-     #{TargetOntologyHierarchies TargetOntologyHierarchiesList}]             ; pending Task 8
+    [common-swagger-api.schema.ontologies common-swagger-api.malli.ontologies #{}]
     [common-swagger-api.schema.permanent-id-requests common-swagger-api.malli.permanent-id-requests
      #{ValidPermanentIDRequestListSortFields}]                               ; pending Task 12
     [common-swagger-api.schema.quicklaunches common-swagger-api.malli.quicklaunches #{}]
