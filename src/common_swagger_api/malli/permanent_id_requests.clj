@@ -184,8 +184,9 @@
     PagingParams
     [:map
      [:sort-field
-      {:optional    true
-       :description SortFieldDocs}
+      {:optional            true
+       :description         SortFieldDocs
+       :json-schema/example :date_submitted}
       ValidPermanentIDRequestListSortFields]
 
      [:statuses

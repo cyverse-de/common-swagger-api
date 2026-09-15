@@ -1228,8 +1228,9 @@
       (mu/merge
        [:map {:closed true}
         [:sort-field
-         {:description SortFieldDocs
-          :optional    true}
+         {:optional            true
+          :description         SortFieldDocs
+          :json-schema/example :name}
          (into [:enum] AppListingValidSortFields)]])))
 
 (def AppJobStatsStartDateParamDocs "Filters out the app stats before this start date")
@@ -1267,8 +1268,9 @@
         AppJobStatsEndDateOptionalParam
 
         [:sort-field
-         {:description SortFieldDocs
-          :optional    true}
+         {:optional            true
+          :description         SortFieldDocs
+          :json-schema/example :name}
          (into [:enum] AppSearchValidSortFields)]])))
 
 (def QualifiedAppId

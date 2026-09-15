@@ -2,7 +2,8 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.apps :as apps]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
+   [malli.json-schema :as js]))
 
 (def app-id #uuid "987e6543-e21b-32c1-b456-426614174000")
 (def version-id #uuid "456e7890-b12c-34d5-e678-901234567890")
@@ -308,12 +309,14 @@
 (deftest AppListingPagingParams
   (valid apps/AppListingPagingParams {} {:limit 50 :offset 0 :sort-dir "ASC" :sort-field :name}
          {:app-type "DE" :attribute "category" :attribute_value "genomics"})
-  (invalid apps/AppListingPagingParams {:sort-field :nope} {:limit 0} {:sort-dir "UP"}))
+  (invalid apps/AppListingPagingParams {:sort-field :nope} {:limit 0} {:sort-dir "UP"})
+  (is (= :name (get-in (js/transform apps/AppListingPagingParams) [:properties :sort-field :example]))))
 
 (deftest AppSearchParams
   (valid apps/AppSearchParams {} {:attribute "a" :attribute_value "b" :search "x" :sort-field :name}
          {:start_date #inst "2024-01-01T00:00:00.000-00:00" :end_date #inst "2025-12-31T23:59:59.000-00:00"})
-  (invalid apps/AppSearchParams {:attribute 1} {:sort-field :nope} {:start_date "2024-01-01"}))
+  (invalid apps/AppSearchParams {:attribute 1} {:sort-field :nope} {:start_date "2024-01-01"})
+  (is (= :name (get-in (js/transform apps/AppSearchParams) [:properties :sort-field :example]))))
 
 (deftest QualifiedAppId
   (valid apps/QualifiedAppId {:system_id "de" :app_id "app-id-12345"})
