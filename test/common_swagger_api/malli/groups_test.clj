@@ -1,287 +1,161 @@
 (ns common-swagger-api.malli.groups-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [common-swagger-api.malli.groups :as groups]
-            [malli.core :as malli]))
+  (:require
+   [clojure.test :refer [deftest]]
+   [common-swagger-api.malli.groups :as groups]
+   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
 
-(defn valid? [schema data]
-  (malli/validate schema data))
+(def base-value {:name "example-group" :type "group"})
 
-(deftest test-ValidGroupPrivileges
-  (testing "ValidGroupPrivileges validation"
-    (is (valid? groups/ValidGroupPrivileges "view"))
-    (is (valid? groups/ValidGroupPrivileges "read"))
-    (is (valid? groups/ValidGroupPrivileges "update"))
-    (is (valid? groups/ValidGroupPrivileges "admin"))
-    (is (valid? groups/ValidGroupPrivileges "optin"))
-    (is (valid? groups/ValidGroupPrivileges "optout"))
-    (is (valid? groups/ValidGroupPrivileges "groupAttrRead"))
-    (is (valid? groups/ValidGroupPrivileges "groupAttrUpdate"))
-    (is (not (valid? groups/ValidGroupPrivileges "invalid")))
-    (is (not (valid? groups/ValidGroupPrivileges "READ")))  ; Case sensitive
-    (is (not (valid? groups/ValidGroupPrivileges nil)))))
+(def group-value
+  (assoc base-value
+         :id_index          "12345"
+         :id                "abc123def456"
+         :description       "An example group"
+         :display_extension "example"
+         :display_name      "Example Group"
+         :extension         "example"))
 
-(deftest test-GroupDetailsParamKey
-  (testing "GroupDetailsParamKey is :details"
-    (is (= :details groups/GroupDetailsParamKey))))
+(def subject-value {:id "user123" :source_id "ldap"})
 
-(deftest test-GroupDetailsParamDesc
-  (testing "GroupDetailsParamDesc function"
-    (let [param-desc (groups/GroupDetailsParamDesc "group")]
-      (is (vector? param-desc))
-      (is (= 2 (count param-desc)))
-      (let [[props type] param-desc]
-        (is (map? props))
-        (is (contains? props :optional))
-        (is (contains? props :description))
-        (is (contains? props :json-schema/example))
-        (is (= :boolean type))
-        (is (true? (:optional props)))
-        (is (string? (:description props)))
-        (is (boolean? (:json-schema/example props)))))))
+(def detail-value
+  {:created_at          1640995200000
+   :has_composite       false
+   :is_composite_factor false})
 
-(deftest test-base-group
-  (testing "base-group function"
-    (let [base-schema (groups/base-group "team")]
-      (is (valid? base-schema
-                  {:name "test-team"
-                   :type "team"}))
-      (is (valid? base-schema
-                  {:name "test-team"
-                   :type "team"
-                   :description "A test team"
-                   :display_extension "test"}))
+(def member-update-result {:success true :subject_id "user123" :source_id "ldap"})
 
-      ;; Missing required fields
-      (is (not (valid? base-schema {})))
-      (is (not (valid? base-schema {:name "test-team"})))
-      (is (not (valid? base-schema {:type "team"}))))))
+(def privilege-update {:subject_id "user123" :privileges ["read" "update"]})
 
-(deftest test-group
-  (testing "group function"
-    (let [group-schema (groups/group "team")]
-      (is (valid? group-schema
-                  {:name "test-team"
-                   :type "team"
-                   :id_index "123"
-                   :id "team-id"}))
-      (is (valid? group-schema
-                  {:name "test-team"
-                   :type "team"
-                   :id_index "123"
-                   :id "team-id"
-                   :display_name "Test Team"
-                   :extension "test"
-                   :description "A test team"}))
+(def privilege-value {:type "access" :name "view" :subject subject-value})
 
-      ;; Missing required fields
-      (is (not (valid? group-schema
-                       {:name "test-team"
-                        :type "team"})))
-      (is (not (valid? group-schema
-                       {:name "test-team"
-                        :type "team"
-                        :id_index "123"}))))))
+(def details-params
+  [:map {:closed true} (into [groups/GroupDetailsParamKey] (groups/GroupDetailsParamDesc "group"))])
 
-(deftest test-group-update
-  (testing "group-update function"
-    (let [group-update-schema (groups/group-update "team")]
-      ;; All fields optional except description and display_extension
-      (is (valid? group-update-schema {}))
-      (is (valid? group-update-schema
-                  {:name "updated-team"}))
-      (is (valid? group-update-schema
-                  {:description "Updated description"
-                   :display_extension "updated"}))
+(deftest ValidGroupPrivileges
+  (valid groups/ValidGroupPrivileges "view" "groupAttrUpdate")
+  (invalid groups/ValidGroupPrivileges :view "nope" nil))
 
-      ;; Should not have type field
-      (is (not (valid? group-update-schema
-                       {:type "team"}))))))
+(deftest GroupDetailsParam
+  (valid details-params {} {:details true})
+  (invalid details-params {:details "true"} {:extra 1}))
 
-(deftest test-group-stub
-  (testing "group-stub function"
-    (let [group-stub-schema (groups/group-stub "team")]
-      ;; All fields should be optional
-      (is (valid? group-stub-schema {}))
-      (is (valid? group-stub-schema
-                  {:name "stub-team"}))
-      (is (valid? group-stub-schema
-                  {:name "stub-team"
-                   :type "team"
-                   :id "team-id"
-                   :id_index "123"})))))
+(deftest base-group
+  (valid (groups/base-group "group") base-value (select-keys group-value [:name :type :description]))
+  (invalid (groups/base-group "group")
+           {}
+           (dissoc base-value :type)
+           (assoc base-value :name 1)
+           (assoc base-value :extra 1)))
 
-(deftest test-group-members
-  (testing "group-members function"
-    (let [group-members-schema (groups/group-members "team")]
-      (is (valid? group-members-schema
-                  {:members []}))
-      (is (valid? group-members-schema
-                  {:members [{:id "user1"
-                              :source_id "ldap"}
-                             {:id "user2"
-                              :source_id "ldap"
-                              :name "User Two"}]}))
+(deftest group
+  (valid (groups/group "group")
+         group-value
+         (dissoc group-value :description :display_extension :display_name :extension))
+  (invalid (groups/group "group")
+           base-value
+           (dissoc group-value :id)
+           (assoc group-value :id_index 12345)
+           (assoc group-value :extra 1)))
 
-      ;; Missing required field
-      (is (not (valid? group-members-schema {})))
-      ;; Invalid member structure
-      (is (not (valid? group-members-schema
-                       {:members [{:id "user1"}]}))))))  ; Missing source_id
+(deftest group-update
+  (valid (groups/group-update "group") {} {:name "example-group"} (dissoc base-value :type))
+  (invalid (groups/group-update "group") base-value {:name 1} {:extra 1}))
 
-(deftest test-GroupMembersUpdate
-  (testing "GroupMembersUpdate validation"
-    (is (valid? groups/GroupMembersUpdate
-                {:members ["user1" "user2" "user3"]}))
-    (is (valid? groups/GroupMembersUpdate
-                {:members []}))
+(deftest group-stub
+  (valid (groups/group-stub "group") {} base-value group-value)
+  (invalid (groups/group-stub "group")
+           (assoc group-value :id 1)
+           (assoc group-value :type nil)
+           (assoc group-value :extra 1)))
 
-    ;; Missing required field
-    (is (not (valid? groups/GroupMembersUpdate {})))
-    ;; Empty strings not allowed (NonBlankString)
-    (is (not (valid? groups/GroupMembersUpdate
-                     {:members ["user1" "" "user3"]})))
-    (is (not (valid? groups/GroupMembersUpdate
-                     {:members ["user1" "   " "user3"]})))))
+(deftest group-detail
+  (valid (groups/group-detail "group")
+         detail-value
+         (assoc detail-value :attribute_names ["attribute1"] :attribute_values ["value1"])
+         (assoc detail-value :created_by "admin" :created_by_detail subject-value :composite_type "intersection")
+         (assoc detail-value :left_group group-value :right_group group-value :modified_at 1640995200000))
+  (invalid (groups/group-detail "group")
+           {}
+           (dissoc detail-value :created_at)
+           (assoc detail-value :has_composite "false")
+           (assoc detail-value :left_group base-value)
+           (assoc detail-value :extra 1)))
 
-(deftest test-GroupMemberSubjectUpdateResponse
-  (testing "GroupMemberSubjectUpdateResponse validation"
-    (is (valid? groups/GroupMemberSubjectUpdateResponse
-                {:success true
-                 :subject_id "user123"
-                 :source_id "ldap"}))
-    (is (valid? groups/GroupMemberSubjectUpdateResponse
-                {:success false
-                 :subject_id "user123"
-                 :source_id "ldap"
-                 :subject_name "John Doe"}))
+(deftest group-with-detail
+  (valid (groups/group-with-detail "group") group-value (assoc group-value :detail detail-value))
+  (invalid (groups/group-with-detail "group")
+           base-value
+           (assoc group-value :detail {})
+           (assoc group-value :detail detail-value :extra 1)))
 
-    ;; Missing required fields
-    (is (not (valid? groups/GroupMemberSubjectUpdateResponse
-                     {:success true
-                      :subject_id "user123"})))
-    ;; Empty strings not allowed for required NonBlankString fields
-    (is (not (valid? groups/GroupMemberSubjectUpdateResponse
-                     {:success true
-                      :subject_id ""
-                      :source_id "ldap"})))
-    ;; Empty string not allowed for optional NonBlankString field
-    (is (not (valid? groups/GroupMemberSubjectUpdateResponse
-                     {:success true
-                      :subject_id "user123"
-                      :source_id "ldap"
-                      :subject_name ""})))))
+(deftest group-list
+  (valid (groups/group-list "group" "groups") {:groups []} {:groups [group-value]})
+  (invalid (groups/group-list "group" "groups") {} {:groups [base-value]} {:groups [] :extra 1}))
 
-(deftest test-GroupMembersUpdateResponse
-  (testing "GroupMembersUpdateResponse validation"
-    (is (valid? groups/GroupMembersUpdateResponse
-                {:results []}))
-    (is (valid? groups/GroupMembersUpdateResponse
-                {:results [{:success true
-                            :subject_id "user123"
-                            :source_id "ldap"}
-                           {:success false
-                            :subject_id "user456"
-                            :source_id "ldap"
-                            :subject_name "Jane Doe"}]}))
+(deftest group-list-with-detail
+  (valid (groups/group-list-with-detail "group" "groups")
+         {:groups []}
+         {:groups [(assoc group-value :detail detail-value)]})
+  (invalid (groups/group-list-with-detail "group" "groups") {} {:groups [{}]} {:groups [] :extra 1}))
 
-    ;; Missing required field
-    (is (not (valid? groups/GroupMembersUpdateResponse {})))
-    ;; Invalid result structure
-    (is (not (valid? groups/GroupMembersUpdateResponse
-                     {:results [{:success true}]})))))
+(deftest group-members
+  (valid (groups/group-members "group") {:members []} {:members [subject-value]})
+  (invalid (groups/group-members "group") {} {:members [{}]} {:members [] :extra 1}))
 
-(deftest test-GroupPrivilegeUpdate
-  (testing "GroupPrivilegeUpdate validation"
-    (is (valid? groups/GroupPrivilegeUpdate
-                {:subject_id "user123"
-                 :privileges ["read" "update"]}))
-    (is (valid? groups/GroupPrivilegeUpdate
-                {:subject_id "user123"
-                 :privileges []}))
+(deftest GroupMembersUpdate
+  (valid groups/GroupMembersUpdate {:members []} {:members ["user1" "user2"]})
+  (invalid groups/GroupMembersUpdate {} {:members [" "]} {:members "user1"} {:members [] :extra 1}))
 
-    ;; Missing required fields
-    (is (not (valid? groups/GroupPrivilegeUpdate
-                     {:subject_id "user123"})))
-    ;; Invalid privilege values
-    (is (not (valid? groups/GroupPrivilegeUpdate
-                     {:subject_id "user123"
-                      :privileges ["read" "invalid"]})))))
+(deftest GroupMemberSubjectUpdateResponse
+  (valid groups/GroupMemberSubjectUpdateResponse
+         member-update-result
+         (assoc member-update-result :subject_name "John Doe"))
+  (invalid groups/GroupMemberSubjectUpdateResponse
+           {}
+           (dissoc member-update-result :source_id)
+           (assoc member-update-result :success "true")
+           (assoc member-update-result :subject_name " ")
+           (assoc member-update-result :extra 1)))
 
-(deftest test-GroupPrivilegeUpdates
-  (testing "GroupPrivilegeUpdates validation"
-    (is (valid? groups/GroupPrivilegeUpdates
-                {:updates []}))
-    (is (valid? groups/GroupPrivilegeUpdates
-                {:updates [{:subject_id "user123"
-                            :privileges ["read" "update"]}
-                           {:subject_id "user456"
-                            :privileges ["view"]}]}))
+(deftest GroupMembersUpdateResponse
+  (valid groups/GroupMembersUpdateResponse {:results []} {:results [member-update-result]})
+  (invalid groups/GroupMembersUpdateResponse {} {:results [{}]} {:results [] :extra 1}))
 
-    ;; Missing required field
-    (is (not (valid? groups/GroupPrivilegeUpdates {})))))
+(deftest GroupPrivilegeUpdate
+  (valid groups/GroupPrivilegeUpdate privilege-update (assoc privilege-update :privileges []))
+  (invalid groups/GroupPrivilegeUpdate
+           {}
+           (dissoc privilege-update :privileges)
+           (assoc privilege-update :privileges ["nope"])
+           (assoc privilege-update :extra 1)))
 
-(deftest test-GroupPrivilegeRemoval
-  (testing "GroupPrivilegeRemoval validation"
-    (is (valid? groups/GroupPrivilegeRemoval
-                {:subject_id "user123"
-                 :privileges ["admin" "update"]}))
-    (is (valid? groups/GroupPrivilegeRemoval
-                {:subject_id "user123"
-                 :privileges []}))
+(deftest GroupPrivilegeUpdates
+  (valid groups/GroupPrivilegeUpdates {:updates []} {:updates [privilege-update]})
+  (invalid groups/GroupPrivilegeUpdates {} {:updates [{}]} {:updates [] :extra 1}))
 
-    ;; Missing required fields
-    (is (not (valid? groups/GroupPrivilegeRemoval
-                     {:subject_id "user123"})))
-    ;; Invalid privilege values
-    (is (not (valid? groups/GroupPrivilegeRemoval
-                     {:subject_id "user123"
-                      :privileges ["admin" "invalid"]})))))
+(deftest GroupPrivilegeRemoval
+  (valid groups/GroupPrivilegeRemoval privilege-update (assoc privilege-update :privileges ["admin"]))
+  (invalid groups/GroupPrivilegeRemoval
+           {}
+           (dissoc privilege-update :subject_id)
+           (assoc privilege-update :privileges "admin")
+           (assoc privilege-update :extra 1)))
 
-(deftest test-GroupPrivilegeRemovals
-  (testing "GroupPrivilegeRemovals validation"
-    (is (valid? groups/GroupPrivilegeRemovals
-                {:updates []}))
-    (is (valid? groups/GroupPrivilegeRemovals
-                {:updates [{:subject_id "user123"
-                            :privileges ["admin" "update"]}]}))
+(deftest GroupPrivilegeRemovals
+  (valid groups/GroupPrivilegeRemovals {:updates []} {:updates [privilege-update]})
+  (invalid groups/GroupPrivilegeRemovals {} {:updates [{}]} {:updates [] :extra 1}))
 
-    ;; Missing required field
-    (is (not (valid? groups/GroupPrivilegeRemovals {})))))
+(deftest Privilege
+  (valid groups/Privilege privilege-value (assoc privilege-value :allowed true :revokable true))
+  (invalid groups/Privilege
+           {}
+           (dissoc privilege-value :subject)
+           (assoc privilege-value :allowed "true")
+           (assoc privilege-value :extra 1)))
 
-(deftest test-Privilege
-  (testing "Privilege validation"
-    (is (valid? groups/Privilege
-                {:type "group"
-                 :name "read"
-                 :subject {:id "user123"
-                           :source_id "ldap"}}))
-    (is (valid? groups/Privilege
-                {:type "group"
-                 :name "read"
-                 :allowed true
-                 :revokable false
-                 :subject {:id "user123"
-                           :source_id "ldap"
-                           :name "John Doe"}}))
+(deftest Privileges
+  (valid groups/Privileges {:privileges []} {:privileges [privilege-value]})
+  (invalid groups/Privileges {} {:privileges [{}]} {:privileges [] :extra 1}))
 
-    ;; Missing required fields
-    (is (not (valid? groups/Privilege
-                     {:type "group"
-                      :name "read"})))
-    (is (not (valid? groups/Privilege
-                     {:type "group"
-                      :subject {:id "user123"
-                                :source_id "ldap"}})))))
-
-(deftest test-Privileges
-  (testing "Privileges validation"
-    (is (valid? groups/Privileges
-                {:privileges []}))
-    (is (valid? groups/Privileges
-                {:privileges [{:type "group"
-                               :name "read"
-                               :subject {:id "user123"
-                                         :source_id "ldap"}}]}))
-
-    ;; Missing required field
-    (is (not (valid? groups/Privileges {})))))
+(deftest json-schema
+  (json-schema-ok 'common-swagger-api.malli.groups))

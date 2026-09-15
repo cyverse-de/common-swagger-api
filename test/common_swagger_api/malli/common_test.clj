@@ -1,62 +1,16 @@
 (ns common-swagger-api.malli.common-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [common-swagger-api.malli.common :as common]
-            [malli.core :as malli]))
+  (:require
+   [clojure.test :refer [deftest]]
+   [common-swagger-api.malli.common :as common]
+   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
 
-(defn valid? [schema data]
-  (malli/validate schema data))
+(deftest IncludeHiddenParams
+  (valid common/IncludeHiddenParams {} {:include-hidden true} {:include-hidden false})
+  (invalid common/IncludeHiddenParams {:include-hidden "true"} {:include-hidden nil} {:extra 1}))
 
-(deftest test-IncludeHiddenParams
-  (testing "IncludeHiddenParams validation"
-    (testing "valid params"
-      (is (valid? common/IncludeHiddenParams {}))
-      (is (valid? common/IncludeHiddenParams
-                  {:include-hidden true}))
-      (is (valid? common/IncludeHiddenParams
-                  {:include-hidden false})))
+(deftest IncludeDeletedParams
+  (valid common/IncludeDeletedParams {} {:include-deleted true} {:include-deleted false})
+  (invalid common/IncludeDeletedParams {:include-deleted "yes"} {:include-deleted nil} {:extra 1}))
 
-    (testing "invalid params"
-      ;; Extra fields not allowed due to :closed true
-      (is (not (valid? common/IncludeHiddenParams
-                       {:include-hidden true
-                        :extra-field "not allowed"})))
-      ;; Wrong type for include-hidden
-      (is (not (valid? common/IncludeHiddenParams
-                       {:include-hidden "not a boolean"})))
-      (is (not (valid? common/IncludeHiddenParams
-                       {:include-hidden 1})))
-      (is (not (valid? common/IncludeHiddenParams
-                       {:include-hidden nil}))))))
-
-(deftest test-IncludeDeletedParams
-  (testing "IncludeDeletedParams validation"
-    (testing "valid params"
-      (is (valid? common/IncludeDeletedParams {}))
-      (is (valid? common/IncludeDeletedParams
-                  {:include-deleted true}))
-      (is (valid? common/IncludeDeletedParams
-                  {:include-deleted false})))
-
-    (testing "invalid params"
-      ;; Extra fields not allowed due to :closed true
-      (is (not (valid? common/IncludeDeletedParams
-                       {:include-deleted true
-                        :extra-field "not allowed"})))
-      ;; Wrong type for include-deleted
-      (is (not (valid? common/IncludeDeletedParams
-                       {:include-deleted "not a boolean"})))
-      (is (not (valid? common/IncludeDeletedParams
-                       {:include-deleted 1})))
-      (is (not (valid? common/IncludeDeletedParams
-                       {:include-deleted nil}))))))
-
-(deftest test-both-params-together
-  (testing "Using both params in the same map"
-    ;; Since these are separate schemas, they can't be combined directly
-    ;; Each schema only allows its specific field
-    (is (not (valid? common/IncludeHiddenParams
-                     {:include-hidden true
-                      :include-deleted true})))
-    (is (not (valid? common/IncludeDeletedParams
-                     {:include-hidden true
-                      :include-deleted true})))))
+(deftest json-schema
+  (json-schema-ok 'common-swagger-api.malli.common))
