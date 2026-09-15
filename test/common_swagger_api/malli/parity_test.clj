@@ -13,8 +13,7 @@
 (def rows
   '[[common-swagger-api.schema common-swagger-api.malli #{}]
     [common-swagger-api.schema.analyses common-swagger-api.malli.analyses
-     #{coerce-analysis-submission-requirements
-       AnalysesRelauncherRequest AnalysisIdPathParam}]                       ; pending Task 6
+     #{coerce-analysis-submission-requirements}]
     [common-swagger-api.schema.analyses.listing common-swagger-api.malli.analyses.listing
      #{OptionalKeyFilter}]
     [common-swagger-api.schema.apps common-swagger-api.malli.apps

@@ -71,7 +71,7 @@
                    :is_public       false
                    :submission      {:system_id             "de"
                                      :app_id                "007a8434-1b84-42e8-b647-4073a62b4b3b"
-                                     :app_version_id        "02ff8f75-a4fc-4d8c-9d76-ef91f764cec4"
+                                     :app_version_id        #uuid "02ff8f75-a4fc-4d8c-9d76-ef91f764cec4"
                                      :config                {:step-1_param-1 "value1"
                                                              :step-1_param-2 "value2"}
                                      :debug                 false
@@ -382,7 +382,7 @@
                    :is_public       false
                    :submission      {:system_id             "de"
                                      :app_id                "007a8434-1b84-42e8-b647-4073a62b4b3b"
-                                     :app_version_id        "02ff8f75-a4fc-4d8c-9d76-ef91f764cec4"
+                                     :app_version_id        #uuid "02ff8f75-a4fc-4d8c-9d76-ef91f764cec4"
                                      :config                {:step-1_param-1 "value1"
                                                              :step-1_param-2 "value2"}
                                      :debug                 false
@@ -642,7 +642,7 @@
                    :is_public       true
                    :submission      {:system_id             "de"
                                      :app_id                "007a8434-1b84-42e8-b647-4073a62b4b3b"
-                                     :app_version_id        "02ff8f75-a4fc-4d8c-9d76-ef91f764cec4"
+                                     :app_version_id        #uuid "02ff8f75-a4fc-4d8c-9d76-ef91f764cec4"
                                      :config                {:step-1_param-1 "updated-value1"
                                                              :step-1_param-2 "updated-value2"}
                                      :debug                 false

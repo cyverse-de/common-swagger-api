@@ -20,7 +20,7 @@
 (def AnalysisStopSummary "Stop a running analysis.")
 (def AnalysisStopDocs "This service allows DE users to stop running analyses.")
 
-(def AnalysisIDPathParam
+(def AnalysisIdPathParam
   [:uuid
    {:description         "The Analysis UUID"
     :json-schema/example #uuid "2b912405-5ae8-4db9-9023-db745b5a7c83"}])
@@ -106,7 +106,7 @@
      {:description "The list of parameters."}
      [:vector AnalysisParameter]]]))
 
-(def AnalysisRelauncherRequest
+(def AnalysesRelauncherRequest
   (mu/closed-schema
    [:map
     [:analyses
@@ -176,6 +176,7 @@
                    :min_gpus
                    :max_gpus
                    :min_disk_space
+                   :gpu_models
                    :step_number]))
 
 (def AnalysisSubmission
@@ -192,8 +193,8 @@
      {:optional            true
       :description         (str "The ID of the app version used to perform the analysis. If not provided, then it is "
                                 "assumed the submission is for the latest version of the app")
-      :json-schema/example "02ff8f75-a4fc-4d8c-9d76-ef91f764cec4"}
-     :string]
+      :json-schema/example #uuid "02ff8f75-a4fc-4d8c-9d76-ef91f764cec4"}
+     :uuid]
 
     [:job_id
      {:optional            true
@@ -295,7 +296,14 @@
      {:optional            true
       :description         "True if iRODS CSI Driver mounts should be created in the container."
       :json-schema/example true}
-     :boolean]]))
+     :boolean]
+
+    [:time_limit_seconds
+     {:optional            true
+      :description         (str "The requested initial duration for the analysis, in seconds. Only used for "
+                                "interactive VICE analyses.")
+      :json-schema/example 3600}
+     :int]]))
 
 (def AnalysisResponse
   (mu/closed-schema
