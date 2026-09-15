@@ -94,6 +94,14 @@
 
 (def avu {:attr "a" :value "v" :unit "u"})
 
+(deftest StringAppIdParam
+  (valid apps/StringAppIdParam "app-id-12345")
+  (invalid apps/StringAppIdParam "" " " 1))
+
+(deftest SystemId
+  (valid apps/SystemId "de")
+  (invalid apps/SystemId "" " " 1))
+
 (deftest AppParameterListItem
   (valid apps/AppParameterListItem list-item {:id (:id list-item)}
          (assoc list-item :description "d" :display "D"))

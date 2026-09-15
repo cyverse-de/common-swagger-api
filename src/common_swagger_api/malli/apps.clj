@@ -1,7 +1,8 @@
 (ns common-swagger-api.malli.apps
   (:require
    [clojure.set :as sets]
-   [common-swagger-api.malli :refer [CommonResponses ErrorResponseNotFound PagingParams SortFieldDocs]]
+   [common-swagger-api.malli :refer [CommonResponses ErrorResponseNotFound NonBlankString PagingParams
+                                     SortFieldDocs]]
    [common-swagger-api.malli.apps.rating :as rating]
    [common-swagger-api.malli.containers :refer [Settings]]
    [common-swagger-api.malli.metadata :refer [AvuListRequest]]
@@ -197,14 +198,18 @@
    :string])
 
 (def StringAppIdParam
-  [:string {:description         "The App identifier"
-            :json-schema/example "app-id-12345"
-            :min                 1}])
+  (mu/update-properties
+   NonBlankString
+   merge
+   {:description         "The App identifier"
+    :json-schema/example "app-id-12345"}))
 
 (def SystemId
-  [:string {:description         "The ID of the app execution system"
-            :json-schema/example "de"
-            :min                 1}])
+  (mu/update-properties
+   NonBlankString
+   merge
+   {:description         "The ID of the app execution system"
+    :json-schema/example "de"}))
 
 (def ToolDeprecatedParam
   [:boolean {:description         "Flag indicating if this Tool has been deprecated"
