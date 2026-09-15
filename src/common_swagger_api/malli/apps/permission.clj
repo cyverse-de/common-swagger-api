@@ -384,7 +384,7 @@
 (def SubjectAnalysisUnsharingResponseElement
   (mu/closed-schema
    (mu/merge
-    SubjectAnalysisUnsharingRequestElement
+    (mu/dissoc SubjectAnalysisUnsharingRequestElement :analyses)
     [:map
      [:analyses
       {:description "The list of analysis unsharing responses for the subject"}
@@ -552,7 +552,7 @@
 (def SubjectToolUnsharingResponseElement
   (mu/closed-schema
    (mu/merge
-    SubjectToolUnsharingRequestElement
+    (mu/dissoc SubjectToolUnsharingRequestElement :tools)
     [:map
      [:tools
       {:description "The list of Tool unsharing responses for the subject"}

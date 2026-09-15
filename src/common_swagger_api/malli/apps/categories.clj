@@ -77,40 +77,24 @@
 
 (def AppCategory
   (m/schema
-   [:schema {:registry {::AppCategory
-                        [:map {:closed true}
-                         [:system_id
-                          {:description         "The ID of the app execution system"
-                           :json-schema/example "de"
-                           :min                 1}
-                          :string]
-
-                         [:id
-                          {:description         "The App Category's UUID"
-                           :json-schema/example #uuid "123e4567-e89b-12d3-a456-426614174000"}
-                          :uuid]
-
-                         [:name
-                          {:description         "The App Category's name"
-                           :json-schema/example "Genome Sequencing"}
-                          :string]
-
-                         [:total
-                          {:description         "The number of Apps under this Category and all of its children"
-                           :json-schema/example 42}
-                          :int]
-
-                         [:is_public
-                          {:description         (str "Whether this App Category is viewable to all users or private "
-                                                     "to only the user that owns its Workspace")
-                           :json-schema/example true}
-                          :boolean]
-
-                         [:categories
-                          {:optional    true
-                           :description "A listing of child App Categories under this App Category"}
-                          [:vector [:ref ::AppCategory]]]]}}
-    [:ref ::AppCategory]]))
+   [:schema
+    {:registry
+     {::AppCategory
+      (conj (m/form AppCategoryBase)
+            [:total
+             {:description         "The number of Apps under this Category and all of its children"
+              :json-schema/example 42}
+             :int]
+            [:is_public
+             {:description         (str "Whether this App Category is viewable to all users or private to only the "
+                                        "user that owns its Workspace")
+              :json-schema/example true}
+             :boolean]
+            [:categories
+             {:optional    true
+              :description "A listing of child App Categories under this App Category"}
+             [:vector [:ref ::AppCategory]]])}}
+    ::AppCategory]))
 
 (def AppCategoryListing
   (mu/closed-schema

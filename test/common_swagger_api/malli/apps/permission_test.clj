@@ -2,7 +2,8 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.apps.permission :as permission]
-   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
+   [malli.json-schema :as js]))
 
 (def subject {:id "user123" :source_id "ldap"})
 
@@ -269,7 +270,10 @@
            {}
            subject-analysis-unsharing-request
            (assoc subject-analysis-unsharing-response :analyses [{}])
-           (assoc subject-analysis-unsharing-response :extra 1)))
+           (assoc subject-analysis-unsharing-response :extra 1))
+  ;; The response list must not inherit the request list's example, which is an array of UUIDs.
+  (is (nil? (get-in (js/transform permission/SubjectAnalysisUnsharingResponseElement)
+                    [:properties :analyses :example]))))
 
 (deftest AnalysisUnsharingRequest
   (valid permission/AnalysisUnsharingRequest {:unsharing []} {:unsharing [subject-analysis-unsharing-request]})
@@ -363,7 +367,10 @@
            {}
            subject-tool-unsharing-request
            (assoc subject-tool-unsharing-response :tools [{}])
-           (assoc subject-tool-unsharing-response :extra 1)))
+           (assoc subject-tool-unsharing-response :extra 1))
+  ;; The response list must not inherit the request list's example, which is an array of UUIDs.
+  (is (nil? (get-in (js/transform permission/SubjectToolUnsharingResponseElement)
+                    [:properties :tools :example]))))
 
 (deftest ToolUnsharingRequest
   (valid permission/ToolUnsharingRequest {:unsharing []} {:unsharing [subject-tool-unsharing-request]})
