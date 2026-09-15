@@ -1,55 +1,37 @@
 (ns common-swagger-api.malli.oauth-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [common-swagger-api.malli.oauth :as oauth]
-            [malli.core :as malli]))
+  (:require
+   [clojure.test :refer [deftest is]]
+   [common-swagger-api.malli.oauth :as oauth]
+   [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
+   [malli.json-schema :as js]))
 
-(defn valid? [schema data]
-  (malli/validate schema data))
+(deftest RedirectUrisResponse
+  (valid oauth/RedirectUrisResponse {} {:agave "https://x"})
+  (invalid oauth/RedirectUrisResponse {:agave 1} {"agave" "https://x"})
+  (is (= [:api-name] (keys (:properties (js/transform oauth/RedirectUrisResponse))))))
 
-(def invalid? (complement valid?))
+(deftest OAuthCallbackQueryParams
+  (valid oauth/OAuthCallbackQueryParams {:code "c" :state "s"})
+  (invalid oauth/OAuthCallbackQueryParams {} {:code "" :state "s"} {:code "c" :state "s" :extra 1}))
 
-(deftest test-RedirectUrisResponse
-  (testing "RedirectUrisResponse validation"
-    (testing "valid redirect URIs response"
-      ;; Empty map is valid since :closed false
-      (is (valid? oauth/RedirectUrisResponse {}))
+(deftest TokenInfoProxyParams
+  (valid oauth/TokenInfoProxyParams {} {:proxy-user "u"})
+  (invalid oauth/TokenInfoProxyParams {:proxy-user ""} {:other 1}))
 
-      ;; Single API with redirect URI
-      (is (valid? oauth/RedirectUrisResponse
-                  {:de "https://example.com/oauth/callback"}))
+(deftest OAuthCallbackResponse
+  (valid oauth/OAuthCallbackResponse {:state_info "s"})
+  (invalid oauth/OAuthCallbackResponse {} {:state_info 1}))
 
-      ;; Multiple APIs with redirect URIs
-      (is (valid? oauth/RedirectUrisResponse
-                  {:de "https://example.com/oauth/callback"
-                   :terrain "https://terrain.example.com/auth/redirect"
-                   :apps "https://apps.example.com/oauth2/callback"}))
+(def token-info
+  {:access_token "a" :expires_at 1735689600000 :refresh_token "r" :webapp "agave"})
 
-      ;; Keywords as keys with string values
-      (is (valid? oauth/RedirectUrisResponse
-                  {:api-v1 "https://api.example.com/v1/callback"
-                   :api-v2 "https://api.example.com/v2/callback"}))
+(deftest AdminTokenInfo
+  (valid oauth/AdminTokenInfo token-info)
+  (invalid oauth/AdminTokenInfo (dissoc token-info :webapp) (assoc token-info :expires_at "x")))
 
-      (is (invalid? oauth/RedirectUrisResponse
-                  {"string-key" "https://example.com/callback"
-                   :keyword-key "https://example.com/callback2"
-                   123 "https://example.com/callback3"})))))
+(deftest TokenInfo
+  (valid oauth/TokenInfo (select-keys token-info [:expires_at :webapp]))
+  (invalid oauth/TokenInfo token-info {:webapp "agave"}))
 
-(deftest test-edge-cases
-  (testing "Edge cases and boundary conditions"
-    (testing "nil values"
-      (is (invalid? oauth/RedirectUrisResponse
-                    {:api nil})))
-
-    (testing "large maps"
-      ;; Create a large map with many entries
-      (let [large-map (into {} (map (fn [i] [(keyword (str "api" i))
-                                             (str "https://example.com/callback" i)])
-                                    (range 100)))]
-        (is (valid? oauth/RedirectUrisResponse large-map))))
-
-    (testing "boolean and numeric keys/values"
-      (is (invalid? oauth/RedirectUrisResponse
-                    {:api1 true
-                     :api2 false
-                     :api3 42
-                     :api4 3.14})))))
+(deftest json-schema
+  (json-schema-ok 'common-swagger-api.malli.oauth))
