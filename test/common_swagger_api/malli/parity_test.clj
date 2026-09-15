@@ -46,9 +46,7 @@
     [common-swagger-api.schema.stats common-swagger-api.malli.stats #{}]
     [common-swagger-api.schema.subjects common-swagger-api.malli.subjects #{}]
     [common-swagger-api.schema.tools common-swagger-api.malli.tools
-     #{coerce-tool-import-requests coerce-tool-list-import-request
-       PrivateToolImportResponse400 PrivateToolImportResponses ToolDeleteResponses ToolDetailsResponses
-       ToolUpdateResponses}]                                                 ; pending Task 14
+     #{coerce-tool-import-requests coerce-tool-list-import-request}]
     [common-swagger-api.schema.webhooks common-swagger-api.malli.webhooks #{}]])
 
 (defn- public-names [ns-sym]

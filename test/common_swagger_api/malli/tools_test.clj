@@ -1,346 +1,355 @@
 (ns common-swagger-api.malli.tools-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [common-swagger-api.malli.tools :as t]
-            [malli.core :as malli]))
+  (:require
+   [clojure.test :refer [deftest is]]
+   [common-swagger-api.malli.test-util :refer [decodes invalid json-schema-ok valid]]
+   [common-swagger-api.malli.tools :as tools]))
 
-(defn valid? [schema data]
-  (malli/validate schema data))
+(def tool-id #uuid "123e4567-e89b-12d3-a456-426614174000")
+(def tool-request-id #uuid "987e6543-e21b-32c1-b456-426614174000")
+(def status-code-id #uuid "abc12345-def6-7890-1234-567890abcdef")
 
-(deftest test-field-params
-  (testing "Field parameter validation"
-    (testing "ToolIdParam"
-      (is (valid? t/ToolIdParam #uuid "123e4567-e89b-12d3-a456-426614174000"))
-      (is (not (valid? t/ToolIdParam "not-a-uuid")))
-      (is (not (valid? t/ToolIdParam 123))))
+(def image
+  {:id   #uuid "6d1b1a2e-3c4d-4e5f-8a9b-0c1d2e3f4a5b"
+   :name "example/image"
+   :tag  "latest"})
 
-    (testing "ToolRequestIdParam"
-      (is (valid? t/ToolRequestIdParam #uuid "987e6543-e21b-32c1-b456-426614174000"))
-      (is (not (valid? t/ToolRequestIdParam "invalid"))))
+(def container
+  {:id           #uuid "f0e1d2c3-b4a5-4968-8778-695a4b3c2d1e"
+   :image        image
+   :memory_limit 2048})
 
-    (testing "ToolNameParam"
-      (is (valid? t/ToolNameParam "samtools"))
-      (is (valid? t/ToolNameParam "blast-2.14.0"))
-      (is (not (valid? t/ToolNameParam 123))))
+(def new-container
+  {:image        (dissoc image :id)
+   :memory_limit 2048})
 
-    (testing "ToolDescriptionParam"
-      (is (valid? t/ToolDescriptionParam "A tool for sequence alignment"))
-      (is (not (valid? t/ToolDescriptionParam nil))))
+(def test-data
+  {:input_files  ["/iplant/home/user/test_input1.txt"]
+   :output_files ["/iplant/home/user/test_output1.txt"]})
 
-    (testing "VersionParam"
-      (is (valid? t/VersionParam "1.15.1"))
-      (is (valid? t/VersionParam "v2.0-beta")))
+(def implementor
+  {:implementor       "Jane Smith"
+   :implementor_email "jane.smith@example.org"})
 
-    (testing "Interactive"
-      (is (valid? t/Interactive true))
-      (is (valid? t/Interactive false))
-      (is (not (valid? t/Interactive "true"))))))
+(def implementation (assoc implementor :test test-data))
 
-(deftest test-ToolSearchParams
-  (testing "ToolSearchParams validation"
-    (testing "valid search params"
-      (is (valid? t/ToolSearchParams {}))
-      (is (valid? t/ToolSearchParams {:search "blast"}))
-      (is (valid? t/ToolSearchParams {:public true}))
-      (is (valid? t/ToolSearchParams {:include-hidden true
-                                       :limit 50
-                                       :offset 0
-                                       :search "samtools"
-                                       :public false})))
+(def tool
+  {:id      tool-id
+   :name    "samtools"
+   :version "1.15.1"
+   :type    "executable"})
 
-    (testing "invalid search params"
-      (is (not (valid? t/ToolSearchParams {:limit -1})))
-      (is (not (valid? t/ToolSearchParams {:offset -10})))
-      (is (not (valid? t/ToolSearchParams {:unknown-field "value"}))))))
+(def tool-details
+  (assoc tool
+         :is_public      true
+         :permission     "own"
+         :implementation implementation
+         :container      container))
 
-(deftest test-ToolDetailsParams
-  (testing "ToolDetailsParams validation"
-    (is (valid? t/ToolDetailsParams {}))
-    (is (valid? t/ToolDetailsParams {:include-defaults true}))
-    (is (valid? t/ToolDetailsParams {:include-defaults false}))
-    (is (not (valid? t/ToolDetailsParams {:include-defaults "yes"})))))
+(def tool-import
+  (assoc (dissoc tool :id)
+         :implementation implementation
+         :container      new-container))
 
-(deftest test-PrivateToolDeleteParams
-  (testing "PrivateToolDeleteParams validation"
-    (is (valid? t/PrivateToolDeleteParams {}))
-    (is (valid? t/PrivateToolDeleteParams {:force-delete true}))
-    (is (valid? t/PrivateToolDeleteParams {:force-delete false}))
-    (is (not (valid? t/PrivateToolDeleteParams {:force-delete "true"})))))
+(def tool-listing-item
+  (assoc tool-details
+         :implementation implementor
+         :container      {:image (dissoc image :id) :memory_limit 2048}))
 
-(deftest test-ToolTestData
-  (testing "ToolTestData validation"
-    (testing "valid test data"
-      (is (valid? t/ToolTestData
-                  {:input_files ["/path/to/input1.txt" "/path/to/input2.txt"]
-                   :output_files ["/path/to/output.txt"]}))
-      (is (valid? t/ToolTestData
-                  {:params ["-n" "100" "-o" "output.txt"]
-                   :input_files ["/test/input.fasta"]
-                   :output_files ["/test/output.bam"]})))
+(def request-status
+  {:status_date 1643723400000
+   :updated_by  "admin"})
 
-    (testing "invalid test data"
-      (is (not (valid? t/ToolTestData {})))
-      (is (not (valid? t/ToolTestData {:input_files []})))
-      (is (not (valid? t/ToolTestData {:output_files ["/output.txt"]}))))))
+(def tool-request-details
+  {:id                tool-request-id
+   :submitted_by      "johndoe"
+   :name              "samtools"
+   :description       "Tool for manipulating SAM/BAM files"
+   :documentation_url "https://samtools.github.io/"
+   :version           "1.15.1"
+   :test_data_path    "/iplant/home/user/test_data.tar.gz"
+   :cmd_line          "samtools view -b input.sam > output.bam"
+   :history           [request-status]})
 
-(deftest test-ToolImplementor
-  (testing "ToolImplementor validation"
-    (testing "valid implementor"
-      (is (valid? t/ToolImplementor
-                  {:implementor "Jane Smith"
-                   :implementor_email "jane.smith@example.org"})))
+(def tool-request-summary
+  {:id             tool-request-id
+   :name           "samtools"
+   :version        "1.15.1"
+   :requested_by   "johndoe"
+   :date_submitted 1643723400000
+   :status         "Pending"
+   :date_updated   1643809800000
+   :updated_by     "admin"})
 
-    (testing "invalid implementor"
-      (is (not (valid? t/ToolImplementor {})))
-      (is (not (valid? t/ToolImplementor {:implementor "Jane Smith"})))
-      (is (not (valid? t/ToolImplementor {:implementor_email "jane@example.org"}))))))
+(def status-code
+  {:id          status-code-id
+   :name        "Approved"
+   :description "The tool request has been approved for implementation"})
 
-(deftest test-ToolImplementation
-  (testing "ToolImplementation validation"
-    (testing "valid implementation"
-      (is (valid? t/ToolImplementation
-                  {:implementor "Jane Smith"
-                   :implementor_email "jane.smith@example.org"
-                   :test {:input_files ["/test/input.txt"]
-                          :output_files ["/test/output.txt"]}})))
+(deftest ToolIdParam
+  (valid tools/ToolIdParam tool-id)
+  (invalid tools/ToolIdParam (str tool-id) nil))
 
-    (testing "invalid implementation"
-      (is (not (valid? t/ToolImplementation
-                       {:implementor "Jane Smith"
-                        :implementor_email "jane@example.org"})))
-      (is (not (valid? t/ToolImplementation
-                       {:test {:input_files ["/test/input.txt"]
-                               :output_files ["/test/output.txt"]}}))))))
+(deftest ToolRequestIdParam
+  (valid tools/ToolRequestIdParam tool-request-id)
+  (invalid tools/ToolRequestIdParam (str tool-request-id) 123))
 
-(deftest test-Tool
-  (testing "Tool schema validation"
-    (testing "valid tool"
-      (is (valid? t/Tool
-                  {:id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                   :name "samtools"
-                   :version "1.15.1"
-                   :type "executable"}))
-      (is (valid? t/Tool
-                  {:id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                   :name "blast"
-                   :description "Basic Local Alignment Search Tool"
-                   :attribution "NCBI"
-                   :location "/usr/local/bin"
-                   :version "2.14.0"
-                   :type "executable"
-                   :restricted false
-                   :time_limit_seconds 3600
-                   :interactive false})))
+(deftest ToolRequestToolIdParam
+  (valid tools/ToolRequestToolIdParam tool-id)
+  (invalid tools/ToolRequestToolIdParam (str tool-id) nil))
 
-    (testing "invalid tool"
-      (is (not (valid? t/Tool {})))
-      (is (not (valid? t/Tool {:name "samtools"
-                                :version "1.15.1"
-                                :type "executable"})))
-      (is (not (valid? t/Tool {:id #uuid "123e4567-e89b-12d3-a456-426614174000"
-                                :name "samtools"
-                                :version "1.15.1"}))))))
+(deftest ToolNameParam
+  (valid tools/ToolNameParam "samtools" "")
+  (invalid tools/ToolNameParam 123 nil))
 
-(deftest test-ToolRequestStatus
-  (testing "ToolRequestStatus validation"
-    (testing "valid status"
-      (is (valid? t/ToolRequestStatus
-                  {:status_date 1643723400000
-                   :updated_by "admin"}))
-      (is (valid? t/ToolRequestStatus
-                  {:status "Pending"
-                   :status_date 1643723400000
-                   :updated_by "admin"
-                   :comments "Reviewing requirements"})))
+(deftest ToolDescriptionParam
+  (valid tools/ToolDescriptionParam "A suite of programs")
+  (invalid tools/ToolDescriptionParam nil 1))
 
-    (testing "invalid status"
-      (is (not (valid? t/ToolRequestStatus {})))
-      (is (not (valid? t/ToolRequestStatus {:status_date "2023-01-01"})))
-      (is (not (valid? t/ToolRequestStatus {:updated_by "admin"}))))))
+(deftest VersionParam
+  (valid tools/VersionParam "1.15.1")
+  (invalid tools/VersionParam 1.15 nil))
 
-(deftest test-ToolRequestDetails
-  (testing "ToolRequestDetails validation"
-    (testing "valid request details"
-      (is (valid? t/ToolRequestDetails
-                  {:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                   :submitted_by "johndoe"
-                   :name "samtools"
-                   :description "Tool for manipulating SAM/BAM files"
-                   :documentation_url "https://samtools.github.io/"
-                   :version "1.15.1"
-                   :test_data_path "/iplant/home/user/test_data.tar.gz"
-                   :cmd_line "samtools view -b input.sam > output.bam"
-                   :history [{:status_date 1643723400000
-                             :updated_by "admin"}]}))
-      (is (valid? t/ToolRequestDetails
-                  {:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                   :submitted_by "user123"
-                   :phone "+1-555-123-4567"
-                   :tool_id #uuid "567e8901-c34d-56e7-f890-123456789012"
-                   :name "blast"
-                   :description "BLAST+ suite"
-                   :source_url "https://github.com/ncbi/blast"
-                   :documentation_url "https://blast.ncbi.nlm.nih.gov/"
-                   :version "2.14.0"
-                   :attribution "NCBI"
-                   :multithreaded true
-                   :test_data_path "/iplant/home/user/blast_test.tar.gz"
-                   :cmd_line "blastn -query input.fasta -db database"
-                   :additional_info "Requires BLAST database files"
-                   :architecture "64-bit Generic"
-                   :history []
-                   :interactive false})))
+(deftest AttributionParam
+  (valid tools/AttributionParam "Heng Li et al.")
+  (invalid tools/AttributionParam nil :heng-li))
 
-    (testing "invalid request details"
-      (is (not (valid? t/ToolRequestDetails {})))
-      (is (not (valid? t/ToolRequestDetails
-                       {:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                        :submitted_by "johndoe"
-                        :name "samtools"})))
-      (is (not (valid? t/ToolRequestDetails
-                       {:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                        :submitted_by "johndoe"
-                        :name "samtools"
-                        :description "Tool"
-                        :documentation_url "https://example.com"
-                        :version "1.0"
-                        :test_data_path "/test/data"
-                        :cmd_line "run"
-                        :history []
-                        :architecture "Invalid Architecture"}))))))
+(deftest SubmittedByParam
+  (valid tools/SubmittedByParam "johndoe")
+  (invalid tools/SubmittedByParam nil 1))
 
-(deftest test-ToolRequest
-  (testing "ToolRequest validation"
-    (testing "valid request"
-      (is (valid? t/ToolRequest
-                  {:name "samtools"
-                   :description "Tool for manipulating SAM/BAM files"
-                   :documentation_url "https://samtools.github.io/"
-                   :version "1.15.1"
-                   :test_data_path "/iplant/home/user/test_data.tar.gz"
-                   :cmd_line "samtools view -b input.sam > output.bam"}))
-      (is (valid? t/ToolRequest
-                  {:name "blast"
-                   :description "BLAST+ suite"
-                   :source_url "https://github.com/ncbi/blast"
-                   :documentation_url "https://blast.ncbi.nlm.nih.gov/"
-                   :version "2.14.0"
-                   :test_data_path "/test/data"
-                   :cmd_line "blastn -query input.fasta"})))
+(deftest ToolRequestStatusCodeId
+  (valid tools/ToolRequestStatusCodeId status-code-id)
+  (invalid tools/ToolRequestStatusCodeId (str status-code-id) nil))
 
-    (testing "invalid request - should not have id, submitted_by, or history"
-      (is (not (valid? t/ToolRequest
-                       {:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                        :name "samtools"
-                        :description "Tool"
-                        :documentation_url "https://example.com"
-                        :version "1.0"
-                        :test_data_path "/test"
-                        :cmd_line "run"}))))))
+(deftest Interactive
+  (valid tools/Interactive true false)
+  (invalid tools/Interactive "true" nil))
 
-(deftest test-ToolRequestSummary
-  (testing "ToolRequestSummary validation"
-    (testing "valid summary"
-      (is (valid? t/ToolRequestSummary
-                  {:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                   :name "samtools"
-                   :version "1.15.1"
-                   :requested_by "johndoe"
-                   :date_submitted 1643723400000
-                   :status "Pending"
-                   :date_updated 1643809800000
-                   :updated_by "admin"}))
-      (is (valid? t/ToolRequestSummary
-                  {:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                   :name "blast"
-                   :version "2.14.0"
-                   :requested_by "user123"
-                   :tool_id #uuid "567e8901-c34d-56e7-f890-123456789012"
-                   :date_submitted 1643723400000
-                   :status "Approved"
-                   :date_updated 1643809800000
-                   :updated_by "admin"})))
+(deftest ToolSearchParams
+  (valid tools/ToolSearchParams
+         {}
+         {:search "blast" :public true}
+         {:include-hidden true :limit 50 :offset 0 :sort-field "name" :sort-dir "ASC"})
+  (invalid tools/ToolSearchParams {:limit -1} {:offset -10} {:public "true"} {:extra 1}))
 
-    (testing "invalid summary"
-      (is (not (valid? t/ToolRequestSummary {})))
-      (is (not (valid? t/ToolRequestSummary
-                       {:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                        :name "samtools"
-                        :version "1.15.1"}))))))
+(deftest ToolDetailsParams
+  (valid tools/ToolDetailsParams {} {:include-defaults true})
+  (invalid tools/ToolDetailsParams {:include-defaults "yes"} {:extra 1}))
 
-(deftest test-ToolRequestListing
-  (testing "ToolRequestListing validation"
-    (is (valid? t/ToolRequestListing {:tool_requests []}))
-    (is (valid? t/ToolRequestListing
-                {:tool_requests [{:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                                  :name "samtools"
-                                  :version "1.15.1"
-                                  :requested_by "johndoe"
-                                  :date_submitted 1643723400000
-                                  :status "Pending"
-                                  :date_updated 1643809800000
-                                  :updated_by "admin"}]}))
-    (is (not (valid? t/ToolRequestListing {})))))
+(deftest PrivateToolDeleteParams
+  (valid tools/PrivateToolDeleteParams {} {:force-delete false})
+  (invalid tools/PrivateToolDeleteParams {:force-delete "true"} {:extra 1}))
 
-(deftest test-ToolRequestListingParams
-  (testing "ToolRequestListingParams validation"
-    (is (valid? t/ToolRequestListingParams {}))
-    (is (valid? t/ToolRequestListingParams {:limit 10 :offset 0}))
-    (is (valid? t/ToolRequestListingParams {:status "Pending"}))
-    (is (valid? t/ToolRequestListingParams
-                {:limit 50
-                 :offset 10
-                 :sort-field "date_submitted"
-                 :sort-dir "DESC"
-                 :status "Approved"}))
-    (is (not (valid? t/ToolRequestListingParams {:limit -1})))))
+(deftest ToolTestData
+  (valid tools/ToolTestData test-data (assoc test-data :params ["-n" "100"]))
+  (invalid tools/ToolTestData
+           {}
+           (dissoc test-data :output_files)
+           (assoc test-data :params "-n")
+           (assoc test-data :extra 1)))
 
-(deftest test-ToolRequestStatusCodeListingParams
-  (testing "ToolRequestStatusCodeListingParams validation"
-    (is (valid? t/ToolRequestStatusCodeListingParams {}))
-    (is (valid? t/ToolRequestStatusCodeListingParams {:filter "approv"}))
-    (is (not (valid? t/ToolRequestStatusCodeListingParams {:filter 123})))))
+(deftest ToolImplementor
+  (valid tools/ToolImplementor implementor)
+  (invalid tools/ToolImplementor
+           {}
+           (dissoc implementor :implementor_email)
+           (assoc implementor :implementor 1)
+           (assoc implementor :extra 1)))
 
-(deftest test-ToolRequestStatusCode
-  (testing "ToolRequestStatusCode validation"
-    (is (valid? t/ToolRequestStatusCode
-                {:id #uuid "abc12345-def6-7890-1234-567890abcdef"
-                 :name "Approved"
-                 :description "The tool request has been approved"}))
-    (is (not (valid? t/ToolRequestStatusCode {})))
-    (is (not (valid? t/ToolRequestStatusCode
-                     {:id #uuid "abc12345-def6-7890-1234-567890abcdef"
-                      :name "Approved"})))))
+(deftest ToolImplementation
+  (valid tools/ToolImplementation implementation)
+  (invalid tools/ToolImplementation
+           implementor
+           (assoc implementation :test {})
+           (assoc implementation :extra 1)))
 
-(deftest test-ToolRequestStatusCodeListing
-  (testing "ToolRequestStatusCodeListing validation"
-    (is (valid? t/ToolRequestStatusCodeListing {:status_codes []}))
-    (is (valid? t/ToolRequestStatusCodeListing
-                {:status_codes [{:id #uuid "abc12345-def6-7890-1234-567890abcdef"
-                                 :name "Pending"
-                                 :description "Request is pending review"}
-                                {:id #uuid "def67890-abc1-2345-6789-0abcdef12345"
-                                 :name "Approved"
-                                 :description "Request has been approved"}]}))
-    (is (not (valid? t/ToolRequestStatusCodeListing {})))))
+(deftest Tool
+  (valid tools/Tool
+         tool
+         (assoc tool :description "d" :attribution "a" :location "/usr/local/bin" :restricted false)
+         (assoc tool :time_limit_seconds 3600 :interactive false))
+  (invalid tools/Tool
+           {}
+           (dissoc tool :id)
+           (assoc tool :time_limit_seconds "3600")
+           (assoc tool :extra 1)))
 
-(deftest test-ToolListingToolRequestSummary
-  (testing "ToolListingToolRequestSummary validation"
-    (is (valid? t/ToolListingToolRequestSummary
-                {:id #uuid "987e6543-e21b-32c1-b456-426614174000"
-                 :status "Approved"}))
-    (is (not (valid? t/ToolListingToolRequestSummary
-                     {:id #uuid "987e6543-e21b-32c1-b456-426614174000"})))
-    (is (not (valid? t/ToolListingToolRequestSummary
-                     {:status "Approved"})))))
+(deftest ToolDetails
+  (valid tools/ToolDetails tool-details)
+  (invalid tools/ToolDetails
+           tool
+           (dissoc tool-details :permission)
+           (assoc tool-details :is_public "true")
+           (assoc tool-details :extra 1)))
 
-(deftest test-ToolListing
-  (testing "ToolListing validation"
-    (is (valid? t/ToolListing
-                {:tools []
-                 :total 0}))
-    (is (valid? t/ToolListing
-                {:tools []
-                 :total 42}))
-    (is (not (valid? t/ToolListing {})))
-    (is (not (valid? t/ToolListing {:tools []})))
-    (is (not (valid? t/ToolListing {:total 10})))))
+(deftest ToolListingImage
+  (valid tools/ToolListingImage {:image (dissoc image :id)} {:image (dissoc image :id) :memory_limit 2048})
+  (invalid tools/ToolListingImage
+           {}
+           {:image image}
+           {:image (dissoc image :id) :id (:id container)}
+           {:image (dissoc image :id) :extra 1}))
+
+(deftest ToolImportRequest
+  (valid tools/ToolImportRequest tool-import (assoc tool-import :id tool-id))
+  (invalid tools/ToolImportRequest
+           tool
+           (dissoc tool-import :implementation)
+           (assoc tool-import :container container)
+           (assoc tool-import :extra 1)))
+
+(deftest import-request-decodes-longs
+  (decodes tools/ToolImportRequest
+           (assoc-in tool-import [:container :memory_limit] "2048")
+           (assoc-in tool-import [:container :memory_limit] 2048)))
+
+(deftest PrivateToolContainerImportRequest
+  (valid tools/PrivateToolContainerImportRequest new-container)
+  (invalid tools/PrivateToolContainerImportRequest
+           {}
+           (assoc new-container :container_devices [])
+           (assoc new-container :container_volumes [])
+           (assoc new-container :container_volumes_from [])))
+
+(deftest PrivateToolImportRequest
+  (valid tools/PrivateToolImportRequest
+         tool-import
+         (dissoc tool-import :type :implementation))
+  (invalid tools/PrivateToolImportRequest
+           {}
+           (dissoc tool-import :name)
+           (assoc-in tool-import [:container :container_devices] [])
+           (assoc tool-import :extra 1)))
+
+(deftest PrivateToolUpdateRequest
+  (valid tools/PrivateToolUpdateRequest
+         tool-import
+         (dissoc tool-import :name :version :container))
+  (invalid tools/PrivateToolUpdateRequest
+           (assoc tool-import :name 1)
+           (assoc-in tool-import [:container :container_volumes] [])
+           (assoc tool-import :extra 1)))
+
+(deftest ToolRequestStatus
+  (valid tools/ToolRequestStatus request-status (assoc request-status :status "Pending" :comments "Reviewing"))
+  (invalid tools/ToolRequestStatus
+           {}
+           (dissoc request-status :updated_by)
+           (assoc request-status :status_date "2023-01-01")
+           (assoc request-status :extra 1)))
+
+(deftest ToolRequestDetails
+  (valid tools/ToolRequestDetails
+         tool-request-details
+         (assoc tool-request-details
+                :phone         "+1-555-123-4567"
+                :tool_id       tool-id
+                :source_url    "https://github.com/samtools/samtools"
+                :multithreaded true
+                :architecture  "64-bit Generic"
+                :interactive   false))
+  (invalid tools/ToolRequestDetails
+           {}
+           (dissoc tool-request-details :cmd_line)
+           (assoc tool-request-details :architecture "Invalid Architecture")
+           (assoc tool-request-details :extra 1)))
+
+(deftest ToolRequest
+  (valid tools/ToolRequest
+         (dissoc tool-request-details :id :submitted_by :history)
+         (assoc (dissoc tool-request-details :id :submitted_by :history)
+                :source_upload_file "/iplant/home/user/tools/mytool.tar.gz"))
+  (invalid tools/ToolRequest
+           tool-request-details
+           (dissoc tool-request-details :id :submitted_by :history :name)
+           (dissoc tool-request-details :submitted_by :history)))
+
+(deftest ToolRequestSummary
+  (valid tools/ToolRequestSummary tool-request-summary (assoc tool-request-summary :tool_id tool-id))
+  (invalid tools/ToolRequestSummary
+           {}
+           (dissoc tool-request-summary :updated_by)
+           (assoc tool-request-summary :date_submitted "1643723400000")
+           (assoc tool-request-summary :extra 1)))
+
+(deftest ToolRequestListing
+  (valid tools/ToolRequestListing {:tool_requests []} {:tool_requests [tool-request-summary]})
+  (invalid tools/ToolRequestListing {} {:tool_requests [{}]} {:tool_requests [] :extra 1}))
+
+(deftest ToolRequestListingParams
+  (valid tools/ToolRequestListingParams {} {:limit 50 :offset 10 :sort-dir "DESC" :status "Approved"})
+  (invalid tools/ToolRequestListingParams {:limit -1} {:status 1} {:extra 1}))
+
+(deftest ToolRequestStatusCodeListingParams
+  (valid tools/ToolRequestStatusCodeListingParams {} {:filter "approv"})
+  (invalid tools/ToolRequestStatusCodeListingParams {:filter 123} {:extra 1}))
+
+(deftest ToolRequestStatusCode
+  (valid tools/ToolRequestStatusCode status-code)
+  (invalid tools/ToolRequestStatusCode
+           {}
+           (dissoc status-code :description)
+           (assoc status-code :id (str status-code-id))
+           (assoc status-code :extra 1)))
+
+(deftest ToolRequestStatusCodeListing
+  (valid tools/ToolRequestStatusCodeListing {:status_codes []} {:status_codes [status-code]})
+  (invalid tools/ToolRequestStatusCodeListing {} {:status_codes [{}]} {:status_codes [] :extra 1}))
+
+(deftest ToolListingToolRequestSummary
+  (valid tools/ToolListingToolRequestSummary (select-keys tool-request-summary [:id :status]))
+  (invalid tools/ToolListingToolRequestSummary
+           {:id tool-request-id}
+           {:status "Approved"}
+           tool-request-summary))
+
+(deftest ToolListingItem
+  (valid tools/ToolListingItem
+         tool-listing-item
+         (assoc tool-listing-item :tool_request (select-keys tool-request-summary [:id :status])))
+  (invalid tools/ToolListingItem
+           tool-details
+           (dissoc tool-listing-item :container)
+           (assoc tool-listing-item :implementation implementation)
+           (assoc tool-listing-item :extra 1)))
+
+(deftest ToolListing
+  (valid tools/ToolListing {:tools [] :total 0} {:tools [tool-listing-item] :total 1})
+  (invalid tools/ToolListing {} {:tools []} {:tools [] :total "0"} {:tools [] :total 0 :extra 1}))
+
+(deftest ErrorPrivateToolRequestBadParam
+  (valid tools/ErrorPrivateToolRequestBadParam
+         {:error_code "ERR_EXISTS"}
+         {:error_code "ERR_BAD_OR_MISSING_FIELD" :reason "Deprecated image"})
+  (invalid tools/ErrorPrivateToolRequestBadParam {} {:error_code "ERR_NOT_FOUND"} {:error_code "ERR_EXISTS" :extra 1}))
+
+(deftest PrivateToolImportResponse400
+  (is (= tools/ErrorPrivateToolRequestBadParam (:body tools/PrivateToolImportResponse400)))
+  (is (re-find #"ERR_BAD_OR_MISSING_FIELD" (:description tools/PrivateToolImportResponse400))))
+
+(deftest PrivateToolImportResponses
+  (is (= #{200 400 500 :default} (set (keys tools/PrivateToolImportResponses))))
+  (is (= tools/ToolDetails (get-in tools/PrivateToolImportResponses [200 :body])))
+  (is (= tools/PrivateToolImportResponse400 (get tools/PrivateToolImportResponses 400)))
+  (valid (get-in tools/PrivateToolImportResponses [500 :body]) {:error_code "ERR_UNCHECKED_EXCEPTION"}))
+
+(deftest ToolDeleteResponses
+  (is (= #{200 400 403 404 500 :default} (set (keys tools/ToolDeleteResponses))))
+  (is (nil? (get-in tools/ToolDeleteResponses [200 :body])))
+  (valid (get-in tools/ToolDeleteResponses [400 :body]) {:error_code "ERR_NOT_WRITEABLE"})
+  (valid (get-in tools/ToolDeleteResponses [403 :body]) {:error_code "ERR_FORBIDDEN"})
+  (valid (get-in tools/ToolDeleteResponses [404 :body]) {:error_code "ERR_NOT_FOUND"}))
+
+(deftest ToolDetailsResponses
+  (is (= #{200 403 404 500 :default} (set (keys tools/ToolDetailsResponses))))
+  (is (= tools/ToolDetails (get-in tools/ToolDetailsResponses [200 :body])))
+  (valid (get-in tools/ToolDetailsResponses [403 :body]) {:error_code "ERR_FORBIDDEN"})
+  (valid (get-in tools/ToolDetailsResponses [404 :body]) {:error_code "ERR_NOT_FOUND"}))
+
+(deftest ToolUpdateResponses
+  (is (= #{200 400 500 :default} (set (keys tools/ToolUpdateResponses))))
+  (is (= tools/ToolDetails (get-in tools/ToolUpdateResponses [200 :body])))
+  (is (= tools/PrivateToolImportResponse400 (get tools/ToolUpdateResponses 400))))
+
+(deftest json-schema
+  (json-schema-ok 'common-swagger-api.malli.tools))

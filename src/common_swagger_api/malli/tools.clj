@@ -1,7 +1,8 @@
 (ns common-swagger-api.malli.tools
   (:require
    [clojure-commons.error-codes :as ce]
-   [common-swagger-api.malli :refer [ErrorResponse PagingParams]]
+   [common-swagger-api.malli :refer [CommonResponses ErrorResponse ErrorResponseForbidden
+                                     ErrorResponseNotFound ErrorResponseNotWritable PagingParams]]
    [common-swagger-api.malli.common :refer [IncludeHiddenParams]]
    [common-swagger-api.malli.containers :refer [Image NewToolContainer
                                                 Settings ToolContainer]]
@@ -167,7 +168,7 @@
    ToolImplementor
    [:map {:closed true}
     [:test
-     {:description ToolImplementationDocs}
+     {:description "The test data for the Tool"}
      ToolTestData]]))
 
 (def Tool
@@ -205,7 +206,8 @@
 
    [:time_limit_seconds
     {:optional            true
-     :description         "The number of seconds that a tool is allowed to execute. A value of 0 means the time limit is disabled"
+     :description         (str "The number of seconds that a tool is allowed to execute. A value of 0 means the time "
+                               "limit is disabled")
      :json-schema/example 3600}
     :int]
 
@@ -270,8 +272,9 @@
   [:map {:closed true}
    [:status
     {:optional            true
-     :description         (str "The status code of the Tool Request update. The status code is case-sensitive, and if it isn't "
-                               "defined in the database already then it will be added to the list of known status codes")
+     :description         (str "The status code of the Tool Request update. The status code is case-sensitive, and if "
+                               "it isn't defined in the database already then it will be added to the list of known "
+                               "status codes")
      :json-schema/example "Pending"}
     :string]
 
@@ -336,10 +339,10 @@
 
    [:multithreaded
     {:optional            true
-     :description         (str "A flag indicating whether or not the tool is multithreaded. This can be `true` to indicate "
-                               "that the user requesting the tool knows that it is multithreaded, `false` to indicate that the "
-                               "user knows that the tool is not multithreaded, or omitted if the user does not know whether or "
-                               "not the tool is multithreaded")
+     :description         (str "A flag indicating whether or not the tool is multithreaded. This can be `true` to "
+                               "indicate that the user requesting the tool knows that it is multithreaded, `false` to "
+                               "indicate that the user knows that the tool is not multithreaded, or omitted if the "
+                               "user does not know whether or not the tool is multithreaded")
      :json-schema/example true}
     :boolean]
 
@@ -389,8 +392,8 @@
       (mu/dissoc :submitted_by)
       (mu/dissoc :history)
       (mu/update-properties assoc :description
-                           (str "A tool installation request. One of `source_url` or `source_upload_file` "
-                               "fields are required, but not both."))))
+                            (str "A tool installation request. One of `source_url` or `source_upload_file` fields are "
+                                 "required, but not both."))))
 
 (def ToolRequestSummary
   [:map {:closed true}
@@ -438,8 +441,9 @@
    [:map {:closed true}
     [:status
      {:optional            true
-      :description         (str "The name of a status code to include in the results. The name of the status code is case "
-                                "sensitive. If the status code isn't already defined, it will be added to the database")
+      :description         (str "The name of a status code to include in the results. The name of the status code is "
+                                "case sensitive. If the status code isn't already defined, it will be added to the "
+                                "database")
       :json-schema/example "Pending"}
      :string]]))
 
@@ -447,8 +451,8 @@
   [:map {:closed true}
    [:filter
     {:optional            true
-     :description         (str "If this parameter is set then only the status codes that contain the string passed in this "
-                               "query parameter will be listed. This is a case-insensitive search")
+     :description         (str "If this parameter is set then only the status codes that contain the string passed in "
+                               "this query parameter will be listed. This is a case-insensitive search")
      :json-schema/example "approv"}
     :string]])
 
@@ -473,27 +477,25 @@
     [:vector ToolRequestStatusCode]]])
 
 (def ToolListingToolRequestSummary
-  [:map {:closed true}
-   [:id ToolRequestIdParam]
+  (mu/select-keys ToolRequestSummary [:id :status]))
 
-   [:status
-    {:description         "The current status of the Tool Request"
-     :json-schema/example "Approved"}
-    :string]])
-
+;; The implementation and container entries are dissociated first because `mu/merge` merges nested map schemas
+;; instead of replacing them.
 (def ToolListingItem
-  (mu/merge
-   ToolDetails
-   [:map {:closed true}
-    [:implementation
-     {:description ToolImplementationDocs}
-     ToolImplementor]
+  (-> ToolDetails
+      (mu/dissoc :implementation)
+      (mu/dissoc :container)
+      (mu/merge
+       [:map {:closed true}
+        [:implementation
+         {:description ToolImplementationDocs}
+         ToolImplementor]
 
-    [:container ToolListingImage]
+        [:container ToolListingImage]
 
-    [:tool_request
-     {:optional true}
-     ToolListingToolRequestSummary]]))
+        [:tool_request
+         {:optional true}
+         ToolListingToolRequestSummary]])))
 
 (def ToolListing
   [:map {:closed true}
@@ -513,3 +515,40 @@
               :json-schema/example ce/ERR_EXISTS}
              ce/ERR_EXISTS
              ce/ERR_BAD_OR_MISSING_FIELD]))
+
+(def PrivateToolImportResponse400
+  {:body        ErrorPrivateToolRequestBadParam
+   :description (str "\n"
+                     "* `ERR_EXISTS`: A Tool with the given `name` already exists.\n"
+                     "* `ERR_BAD_OR_MISSING_FIELD`: The image with the given `name` and `tag` has been deprecated.")})
+
+(def PrivateToolImportResponses
+  (merge CommonResponses
+         {200 {:body        ToolDetails
+               :description "The new Tool details."}
+          400 PrivateToolImportResponse400}))
+
+(def ToolDeleteResponses
+  (merge CommonResponses
+         {200 {:description "The Tool was successfully deleted."}
+          400 {:body        ErrorResponseNotWritable
+               :description "The Tool could not be deleted."}
+          403 {:body        ErrorResponseForbidden
+               :description "The requesting user does not have permission to delete this Tool."}
+          404 {:body        ErrorResponseNotFound
+               :description "A Tool with the given `tool-id` does not exist."}}))
+
+(def ToolDetailsResponses
+  (merge CommonResponses
+         {200 {:body        ToolDetails
+               :description "The Tool details."}
+          403 {:body        ErrorResponseForbidden
+               :description "The requesting user does not have `read` permission for the Tool."}
+          404 {:body        ErrorResponseNotFound
+               :description "The `tool-id` does not exist."}}))
+
+(def ToolUpdateResponses
+  (merge CommonResponses
+         {200 {:body        ToolDetails
+               :description "The updated Tool details."}
+          400 PrivateToolImportResponse400}))
