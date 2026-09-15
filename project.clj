@@ -21,13 +21,19 @@
   :managed-dependencies [[com.fasterxml.jackson.core/jackson-annotations "2.21"]
                          [com.fasterxml.jackson.core/jackson-databind "2.21.1"]
                          [commons-codec "1.16.1"]
+                         ;; compojure-api's ring-middleware-format and malli's edamame disagree.
+                         [org.clojure/tools.reader "1.5.2"]
                          [potemkin "0.4.5"]
                          [prismatic/schema "1.1.12"]
                          [ring/ring-codec "1.1.0"]
                          [ring/ring-core "1.6.3"]]
   :dependencies [[org.clojure/clojure "1.12.5"]
                  [cheshire "6.2.0"]
-                 [metosin/compojure-api "1.1.14"]
+                 ;; Direct because medley.core must not depend on clojure-commons' transitive.
+                 [dev.weavejester/medley "1.10.0"]
+                 ;; old medley redefines abs on Clojure 1.12; dev.weavejester/medley replaces it.
+                 [metosin/compojure-api "1.1.14" :exclusions [medley]]
+                 [metosin/malli "0.20.1"]
                  [metosin/schema-tools "0.14.0"]
                  [org.cyverse/clojure-commons "3.0.13"]
                  [org.cyverse/heuristomancer "2.8.8"]
