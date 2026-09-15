@@ -203,7 +203,7 @@
 (deftest AppStepResourceRequirements
   (valid apps/AppStepResourceRequirements
          {:step_number 1}
-         {:step_number 1 :memory_limit 1073741824 :min_cpu_cores 1.0 :max_cpu_cores 4.0}
+         {:step_number 1 :memory_limit 1073741824 :min_cpu_cores 1.0 :max_cpu_cores 4.0 :gpu_models ["A100"]}
          {:step_number 1 :default_max_gpus 2 :default_gpus 0 :default_gpu_models ["A100"]})
   (invalid apps/AppStepResourceRequirements {} {:step_number "1"} {:step_number 1 :default_gpu_models "A100"}))
 

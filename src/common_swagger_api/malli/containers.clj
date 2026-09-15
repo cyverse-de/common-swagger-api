@@ -111,6 +111,13 @@
      :json-schema/example 10737418240}
     :int]
 
+   [:gpu_models
+    {:optional            true
+     :description         (str "The GPU models that work with this tool container. Empty means no limitation on "
+                               "GPU model.")
+     :json-schema/example ["A100"]}
+    [:vector :string]]
+
    [:network_mode
     {:optional            true
      :description         "The network mode for the tool container"
@@ -355,7 +362,8 @@
         [:image
          {:description "The container image information"}
          Image]])
-      (mu/update-properties assoc :description "All container and container image information associated with a tool.")))
+      (mu/update-properties
+       assoc :description "All container and container image information associated with a tool.")))
 
 (def NewToolContainer
   (-> (mu/merge

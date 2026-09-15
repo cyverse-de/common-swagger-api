@@ -103,10 +103,12 @@
   (valid analyses/AnalysisStepResourceRequirements
          {:step_number 1}
          {:step_number 1 :min_memory_limit 1024 :min_disk_space 10737418240}
-         {:step_number 1 :min_cpu_cores 1.0 :max_cpu_cores 4.0 :min_gpus 0 :max_gpus 2})
+         {:step_number 1 :min_cpu_cores 1.0 :max_cpu_cores 4.0 :min_gpus 0 :max_gpus 2}
+         {:step_number 1 :gpu_models ["A100"]})
   (invalid analyses/AnalysisStepResourceRequirements
            {}
            {:step_number "1"}
+           {:step_number 1 :gpu_models "A100"}
            {:step_number 1 :memory_limit 1024}
            {:step_number 1 :default_max_gpus 2}))
 
