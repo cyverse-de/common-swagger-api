@@ -1117,3 +1117,33 @@ Same steps as Task 16 with:
 - [ ] **Step 3**: `lein test` passes; `lein eastwood` reports no new warnings; `lein with-profile +kondo clj-kondo` reports no new warnings in `src/common_swagger_api/malli*` or `test/`.
 - [ ] **Step 4**: `cat $(find test -name '*.clj') | wc -l` is below 10000.
 - [ ] **Step 5**: Commit any fixes: `"Finish the Malli migration verification"`.
+
+---
+
+### Task 27: Structural parity test (added during execution; run after Task 14, before Task 15)
+
+**Files:**
+- Modify: `test/common_swagger_api/malli/parity_test.clj`
+- Modify: any `src/common_swagger_api/malli/*.clj` where the new test reveals a key-set mismatch
+
+**Interfaces:**
+- Consumes: `rows` from the existing parity test.
+- Produces: `(deftest map-schemas-have-the-same-keys ...)`, which for every same-named pair of vars in `rows` whose plumatic value is a map schema compares the required key set and the optional key set with the Malli twin, recursing into map-valued entries, vectors of maps, and `maybe`/`:maybe` wrappers.
+
+Why: `mu/merge` deep-merges nested map schemas and merges entry properties, so a Malli schema derived with `mu/merge` can silently keep keys the plumatic version replaced (Task 14 found `ToolListingItem` this way). The name-only parity test cannot see it.
+
+- [ ] **Step 1: Write the structural walk**
+
+Plumatic side: a map schema is a Clojure map whose keys are keywords or `schema.core/OptionalKey`/`RequiredKey` records. Use `schema.core/explicit-schema-key` for the keyword and `schema.core/required-key?` / `schema.core/optional-key?` for the kind. Skip maps that have a non-specific key (e.g. `s/Keyword`), which are map-of schemas. Unwrap `schema.core.Maybe` (field `:schema`), a one-element vector (element schema), `common-swagger-api.schema/DocOnly` (field `:schema-real`), and `schema.core/Recursive` (deref `:derefable`, but do not recurse into it more than once).
+
+Malli side: `(malli.core/schema x)`, then `(malli.core/deref-all s)`; if `(malli.core/type s)` is `:map`, use `(malli.core/entries s)` where each entry is `[key props child]` and `(:optional props)` marks optional keys; unwrap `:maybe` and `:vector` via `(malli.core/children s)`; `:schema`/`::m/schema`/`:ref` via `deref-all`. Stop recursion at anything else.
+
+Compare: for each map pair, `(is (= plumatic-required malli-required) path)` and `(is (= plumatic-optional malli-optional) path)` where `path` names the var and the key path. Track visited Malli schemas by identity to stop on recursion.
+
+- [ ] **Step 2: Run it and fix every mismatch in `src/common_swagger_api/malli`**
+
+Run: `lein test :only common-swagger-api.malli.parity-test`. For each mismatch, the plumatic file is the source of truth. Fix the Malli schema by deriving it the way plumatic does, using `mu/dissoc` before `mu/merge` when re-binding a key. Do not add exclusions to make the test pass unless the plumatic side is genuinely not a map (document each exclusion beside its row).
+
+- [ ] **Step 3: Full suite, commit**
+
+Run: `lein test`. Commit: `"Add a structural parity test and fix the key-set mismatches it found"`.
