@@ -6,61 +6,64 @@
   [:uuid {:description         "The target item's UUID"
           :json-schema/example #uuid "a14dfe49-f65f-418b-b3c5-6497284251fe"}])
 
+;; The fields shared by `Avu` and `AvuRequest`; both add their own recursive `:avus` entry.
+(def ^:private AvuBase
+  [:map {:closed true}
+
+   [:id
+    {:description         "The AVU's UUID"
+     :json-schema/example "70fc1080-3152-4c09-92b0-f5b9cc70088b"}
+    :uuid]
+
+   [:attr
+    {:description         "The Attribute's name"
+     :json-schema/example "attribute-name"}
+    :string]
+
+   [:value
+    {:description         "The Attribute's value"
+     :json-schema/example "attribute-value"}
+    :string]
+
+   [:unit
+    {:description         "The attribute's unit"
+     :json-schema/example "attribute-unit"}
+    :string]
+
+   [:target_id
+    {:description         "The target item's UUID"
+     :json-schema/example "a14dfe49-f65f-418b-b3c5-6497284251fe"}
+    :uuid]
+
+   [:created_by
+    {:description         "The ID of the user who created the AVU"
+     :json-schema/example "user123"}
+    :string]
+
+   [:modified_by
+    {:description         "The ID of the user who last modified the AVU"
+     :json-schema/example "user321"}
+    :string]
+
+   [:created_on
+    {:description         "The date the AVU was created in ms since the POSIX epoch"
+     :json-schema/example 1757465246000}
+    :int]
+
+   [:modified_on
+    {:description         "The date the AVU was late modified in ms since the POSIX epoch"
+     :json-schema/example 1757465251000}
+    :int]])
+
 (def Avu
   (m/schema
     [:schema
      {:registry
-      {::avu [:map {:closed true}
-
-              [:id
-               {:description         "The AVU's UUID"
-                :json-schema/example "70fc1080-3152-4c09-92b0-f5b9cc70088b"}
-               :uuid]
-
-              [:attr
-               {:description         "The Attribute's name"
-                :json-schema/example "attribute-name"}
-               :string]
-
-              [:value
-               {:description         "The Attribute's value"
-                :json-schema/example "attribute-value"}
-               :string]
-
-              [:unit
-               {:description         "The attribute's unit"
-                :json-schema/example "attribute-unit"}
-               :string]
-
-              [:target_id
-               {:description         "The target item's UUID"
-                :json-schema/example "a14dfe49-f65f-418b-b3c5-6497284251fe"}
-               :uuid]
-
-              [:created_by
-               {:description         "The ID of the user who created the AVU"
-                :json-schema/example "user123"}
-               :string]
-
-              [:modified_by
-               {:description         "The ID of the user who last modified the AVU"
-                :json-schema/example "user321"}
-               :string]
-
-              [:created_on
-               {:description         "The date the AVU was created in ms since the POSIX epoch"
-                :json-schema/example 1757465246000}
-               :int]
-
-              [:modified_on
-               {:description         "The date the AVU was late modified in ms since the POSIX epoch"
-                :json-schema/example 1757465251000}
-               :int]
-
-              [:avus
-               {:description "AVUs attached to this AVU"
-                :optional    true}
-               [:vector [:ref ::avu]]]]}}
+      {::avu (conj (m/form AvuBase)
+                   [:avus
+                    {:description "AVUs attached to this AVU"
+                     :optional    true}
+                    [:vector [:ref ::avu]]])}}
      ::avu]))
 
 (def AvuList
@@ -73,63 +76,12 @@
   (m/schema
     [:schema
      {:registry
-      {::avu-request [:map {:closed true}
-
-                      [:id
-                       {:description         "The AVU's UUID"
-                        :json-schema/example "70fc1080-3152-4c09-92b0-f5b9cc70088b"
-                        :optional            true}
-                       :uuid]
-
-                      [:attr
-                       {:description         "The Attribute's name"
-                        :json-schema/example "attribute-name"}
-                       :string]
-
-                      [:value
-                       {:description         "The Attribute's value"
-                        :json-schema/example "attribute-value"}
-                       :string]
-
-                      [:unit
-                       {:description         "The attribute's unit"
-                        :json-schema/example "attribute-unit"}
-                       :string]
-
-                      [:target_id
-                       {:description         "The target item's UUID"
-                        :json-schema/example "a14dfe49-f65f-418b-b3c5-6497284251fe"
-                        :optional            true}
-                       :uuid]
-
-                      [:created_by
-                       {:description         "The ID of the user who created the AVU"
-                        :json-schema/example "user123"
-                        :optional            true}
-                       :string]
-
-                      [:modified_by
-                       {:description         "The ID of the user who last modified the AVU"
-                        :json-schema/example "user321"
-                        :optional            true}
-                       :string]
-
-                      [:created_on
-                       {:description         "The date the AVU was created in ms since the POSIX epoch"
-                        :json-schema/example 1757465246000
-                        :optional            true}
-                       :int]
-
-                      [:modified_on
-                       {:description         "The date the AVU was late modified in ms since the POSIX epoch"
-                        :json-schema/example 1757465251000
-                        :optional            true}
-                       :int]
-
-                      [:avus
-                       {:description "AVUs attached to this AVU"
-                        :optional    true}
-                       [:vector [:ref ::avu-request]]]]}}
+      {::avu-request
+       (conj (m/form (mu/optional-keys AvuBase [:id :target_id :created_by :modified_by :created_on :modified_on]))
+             [:avus
+              {:description "AVUs attached to this AVU"
+               :optional    true}
+              [:vector [:ref ::avu-request]]])}}
      ::avu-request]))
 
 (def AvuListRequest

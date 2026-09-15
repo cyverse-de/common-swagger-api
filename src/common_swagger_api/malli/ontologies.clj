@@ -61,28 +61,11 @@
 (def OntologyClassHierarchy
   (m/schema
    [:schema {:registry {::OntologyClassHierarchy
-                        [:map {:closed true}
-                         [:iri
-                          {:description         "The unique IRI for this Ontology Class"
-                           :json-schema/example "http://purl.obolibrary.org/obo/GO_0008150"}
-                          :string]
-
-                         [:label
-                          {:description         "The label annotation of this Ontology Class"
-                           :json-schema/example "biological_process"}
-                          [:maybe :string]]
-
-                         [:description
-                          {:optional            true
-                           :description         "The description annotation of this Ontology Class"
-                           :json-schema/example (str "A biological process is the execution of a "
-                                                     "genetically-encoded biological module or program")}
-                          [:maybe :string]]
-
-                         [:subclasses
-                          {:optional    true
-                           :description "Subclasses of this Ontology Class"}
-                          [:vector [:ref ::OntologyClassHierarchy]]]]}}
+                        (conj (m/form OntologyClass)
+                              [:subclasses
+                               {:optional    true
+                                :description "Subclasses of this Ontology Class"}
+                               [:vector [:ref ::OntologyClassHierarchy]]])}}
     [:ref ::OntologyClassHierarchy]]))
 
 (def OntologyHierarchy
