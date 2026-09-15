@@ -74,9 +74,9 @@ Port into existing Malli namespaces, in plumatic definition order:
 
 | Namespace | Changes to port |
 |---|---|
-| apps | ResourcePreset, ResourcePresetList, ResourcePresetRequest, ResourcePresetUpdateRequest, AttributeValueSelectionParams; `mount_data_store`, `overall_job_type`, `gpu_models`, `default_gpu_models`, and launch-time duration fields on the job view schemas; missing `ToolAppListingResponses`; rename `AppTools` if it has no plumatic twin |
+| apps | ResourcePreset, ResourcePresetList, ResourcePresetRequest, ResourcePresetUpdateRequest, AttributeValueSelectionParams; `mount_data_store`, `overall_job_type`, `gpu_models`, `default_gpu_models`, and launch-time duration fields on the job view schemas; missing `ToolAppListingResponses`; `AppTools` is a Malli-only helper and stays |
 | analyses | AnalysesRelauncherRequest and AnalysisIdPathParam names, `gpu_models`, duration fields |
-| analyses.listing | OptionalKeyFilter equivalent or documented exclusion |
+| analyses.listing | nothing to port; `OptionalKeyFilter` is a plumatic-only key var and is excluded in the parity test |
 | containers | `gpu_models`; the `*ParamOptional` vars become plain optional entries |
 | ontologies | TargetOntologyHierarchies, TargetOntologyHierarchiesList |
 | oauth | the 20 unmigrated defs |
