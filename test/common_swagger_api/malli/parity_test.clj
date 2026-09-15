@@ -50,6 +50,7 @@
     [common-swagger-api.schema.groups common-swagger-api.malli.groups #{}]
     [common-swagger-api.schema.integration-data common-swagger-api.malli.integration-data #{}]
     [common-swagger-api.schema.metadata common-swagger-api.malli.metadata #{}]
+    [common-swagger-api.schema.metadata.comments common-swagger-api.malli.metadata.comments #{}]
     [common-swagger-api.schema.oauth common-swagger-api.malli.oauth #{}]
     [common-swagger-api.schema.ontologies common-swagger-api.malli.ontologies #{}]
     [common-swagger-api.schema.permanent-id-requests common-swagger-api.malli.permanent-id-requests #{}]
