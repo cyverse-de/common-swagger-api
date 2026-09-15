@@ -55,6 +55,7 @@
     [common-swagger-api.schema.subjects common-swagger-api.malli.subjects #{}]
     [common-swagger-api.schema.tools common-swagger-api.malli.tools
      #{coerce-tool-import-requests coerce-tool-list-import-request}]
+    [common-swagger-api.schema.tools.admin common-swagger-api.malli.tools.admin #{}]
     [common-swagger-api.schema.webhooks common-swagger-api.malli.webhooks #{}]])
 
 (defn- public-names [ns-sym]
