@@ -40,7 +40,9 @@
            (assoc settings :gpu_models "A100") (assoc settings :extra 1)))
 
 (deftest settings-decode-longs
-  (decodes containers/Settings {:memory_limit "1024"} {:memory_limit 1024}))
+  (decodes containers/Settings
+           {:memory_limit "1024" :min_memory_limit "512" :min_disk_space "2048"}
+           {:memory_limit 1024 :min_memory_limit 512 :min_disk_space 2048}))
 
 (deftest NewSettings
   (valid containers/NewSettings {} settings (assoc settings :gpu_models []))

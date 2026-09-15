@@ -135,7 +135,7 @@
   (mu/optional-keys (mu/merge DirStatInfo FileStatInfo)))
 
 (def AvailableStatFields
-  (mu/keys FilteredStatInfo))
+  (vec (mu/keys FilteredStatInfo)))
 
 (def FileStat
   (mu/closed-schema

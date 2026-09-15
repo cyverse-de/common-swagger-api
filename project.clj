@@ -29,7 +29,9 @@
                          [ring/ring-core "1.6.3"]]
   :dependencies [[org.clojure/clojure "1.12.5"]
                  [cheshire "6.2.0"]
-                 ;; old medley redefines abs on Clojure 1.12; clojure-commons brings dev.weavejester/medley.
+                 ;; Direct because medley.core must not depend on clojure-commons' transitive.
+                 [dev.weavejester/medley "1.10.0"]
+                 ;; old medley redefines abs on Clojure 1.12; dev.weavejester/medley replaces it.
                  [metosin/compojure-api "1.1.14" :exclusions [medley]]
                  [metosin/malli "0.20.1"]
                  [metosin/schema-tools "0.14.0"]

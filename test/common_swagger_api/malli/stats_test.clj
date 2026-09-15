@@ -88,7 +88,7 @@
 (deftest AvailableStatFields
   (is (= [:id :path :type :label :date-created :date-modified :permission :share-count
           :file-count :dir-count :file-size :content-type :infoType :md5]
-         (vec stats/AvailableStatFields))))
+         stats/AvailableStatFields)))
 
 (deftest FileStat
   (valid stats/FileStat {:file file-stat})

@@ -1,14 +1,16 @@
 (ns common-swagger-api.schema.stats
-  (:require
-   [clojure-commons.error-codes :as ce]
-   [common-swagger-api.schema
-             :refer [->optional-param CommonResponses describe doc-only
-                     ErrorResponseUnchecked NonBlankString
+  (:require [common-swagger-api.schema
+             :refer [->optional-param
+                     CommonResponses
+                     describe
+                     doc-only
+                     ErrorResponseUnchecked
+                     NonBlankString
                      optional-key->keyword]]
-   [common-swagger-api.schema.data :as data-schema]
-   [schema.core :as s])
-  (:import
-   [java.util UUID]))
+            [clojure-commons.error-codes :as ce]
+            [common-swagger-api.schema.data :as data-schema]
+            [schema.core :as s])
+  (:import [java.util UUID]))
 
 (def StatSummary "File and Folder Status Information")
 (def StatDocs

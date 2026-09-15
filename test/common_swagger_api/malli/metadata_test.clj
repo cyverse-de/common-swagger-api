@@ -2,7 +2,13 @@
   (:require
    [clojure.test :refer [deftest is]]
    [common-swagger-api.malli.metadata :as metadata]
-   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]))
+   [common-swagger-api.malli.test-util :refer [examples-valid invalid json-schema-ok valid]]
+   [malli.core :as m]
+   [malli.util :as mu]))
+
+(defn- entry-description
+  [schema k]
+  (-> (m/deref-all (m/schema schema)) (mu/find k) second :description))
 
 (def target-id #uuid "a14dfe49-f65f-418b-b3c5-6497284251fe")
 
@@ -30,7 +36,10 @@
            (dissoc avu :unit)
            (assoc avu :created_on "1757465246000")
            (assoc avu :avus [{}])
-           (assoc avu :extra 1)))
+           (assoc avu :extra 1))
+  (is (= "The Attribute's unit" (entry-description metadata/Avu :unit)))
+  (is (= "The date the AVU was last modified in ms since the POSIX epoch"
+         (entry-description metadata/Avu :modified_on))))
 
 (deftest AvuList
   (valid metadata/AvuList {:avus []} {:avus [avu]})
@@ -43,7 +52,10 @@
            (dissoc avu-request :value)
            (assoc avu-request :target_id (str target-id))
            (assoc avu-request :avus [{}])
-           (assoc avu-request :extra 1)))
+           (assoc avu-request :extra 1))
+  (is (= "The Attribute's unit" (entry-description metadata/AvuRequest :unit)))
+  (is (= "The date the AVU was last modified in ms since the POSIX epoch"
+         (entry-description metadata/AvuRequest :modified_on))))
 
 (deftest AvuListRequest
   (valid metadata/AvuListRequest {:avus []} {:avus [avu-request]})

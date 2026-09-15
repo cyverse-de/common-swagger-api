@@ -26,7 +26,7 @@
     :string]
 
    [:unit
-    {:description         "The attribute's unit"
+    {:description         "The Attribute's unit"
      :json-schema/example "attribute-unit"}
     :string]
 
@@ -51,7 +51,7 @@
     :int]
 
    [:modified_on
-    {:description         "The date the AVU was late modified in ms since the POSIX epoch"
+    {:description         "The date the AVU was last modified in ms since the POSIX epoch"
      :json-schema/example 1757465251000}
     :int]])
 
