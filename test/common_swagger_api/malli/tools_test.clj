@@ -322,13 +322,11 @@
   (valid tools/ErrorPrivateToolRequestBadParam
          {:error_code "ERR_EXISTS"}
          {:error_code "ERR_BAD_OR_MISSING_FIELD" :reason "Deprecated image"})
-  (invalid tools/ErrorPrivateToolRequestBadParam {} {:error_code "ERR_NOT_FOUND"} {:error_code "ERR_EXISTS" :extra 1}))
-
-(deftest ErrorPrivateToolRequestBadParam-json-schema
-  (is (= {:description         "Exists or Bad Field error code"
-          :type                "string"
-          :enum                ["ERR_EXISTS" "ERR_BAD_OR_MISSING_FIELD"]
-          :example             "ERR_EXISTS"}
+  (invalid tools/ErrorPrivateToolRequestBadParam {} {:error_code "ERR_NOT_FOUND"} {:error_code "ERR_EXISTS" :extra 1})
+  (is (= {:description "Exists or Bad Field error code"
+          :type        "string"
+          :enum        ["ERR_EXISTS" "ERR_BAD_OR_MISSING_FIELD"]
+          :example     "ERR_EXISTS"}
          (get-in (js/transform tools/ErrorPrivateToolRequestBadParam) [:properties :error_code]))))
 
 (deftest PrivateToolImportResponse400
