@@ -1,11 +1,11 @@
 (ns common-swagger-api.malli.apps
   (:require
    [clojure.set :as sets]
-   [common-swagger-api.malli :refer [PagingParams SortFieldDocs]]
+   [common-swagger-api.malli :refer [CommonResponses ErrorResponseNotFound PagingParams SortFieldDocs]]
    [common-swagger-api.malli.apps.rating :as rating]
    [common-swagger-api.malli.containers :refer [Settings]]
    [common-swagger-api.malli.metadata :refer [AvuListRequest]]
-   [common-swagger-api.malli.ontologies :refer [OntologyClassHierarchy]]
+   [common-swagger-api.malli.ontologies :refer [OntologyHierarchyList]]
    [common-swagger-api.malli.tools :refer [Tool ToolDetails ToolListingImage
                                            ToolListingItem]]
    [malli.core :as m]
@@ -144,18 +144,6 @@
        "then places the App in the Beta category. A Tito administrator can subsequently move the App to the "
        "suggested location at a later time if it proves to be useful."))
 
-(def ToolListDocs "The tools used to execute the App")
-(def GroupListDocs "The list of Parameter Groups associated with the App")
-(def ParameterListDocs "The list of Parameters in this Group")
-(def ListItemOrTreeDocs
-  (str "The List Parameter's arguments. Only used in cases where the user is given a fixed number of values to choose "
-       "from. This can occur for Parameters such as `TextSelection` or `IntegerSelection` Parameters"))
-(def TreeSelectorParameterListDocs "The TreeSelector root's arguments")
-(def TreeSelectorGroupListDocs "The TreeSelector root's groups")
-(def TreeSelectorGroupParameterListDocs "The TreeSelector Group's arguments")
-(def TreeSelectorGroupGroupListDocs "The TreeSelector Group's groups")
-(def AppListingJobStatsDocs "Some launch statistics associated with the App")
-
 ;; Field definitions
 
 (def AppCategoryIdPathParam
@@ -222,6 +210,18 @@
   [:boolean {:description         "Flag indicating if this Tool has been deprecated"
              :json-schema/example false}])
 
+(def ToolListDocs "The tools used to execute the App")
+(def GroupListDocs "The list of Parameter Groups associated with the App")
+(def ParameterListDocs "The list of Parameters in this Group")
+(def ListItemOrTreeDocs
+  (str "The List Parameter's arguments. Only used in cases where the user is given a fixed number of values to choose "
+       "from. This can occur for Parameters such as `TextSelection` or `IntegerSelection` Parameters"))
+(def TreeSelectorParameterListDocs "The TreeSelector root's arguments")
+(def TreeSelectorGroupListDocs "The TreeSelector root's groups")
+(def TreeSelectorGroupParameterListDocs "The TreeSelector Group's arguments")
+(def TreeSelectorGroupGroupListDocs "The TreeSelector Group's groups")
+(def AppListingJobStatsDocs "Some launch statistics associated with the App")
+
 ;; Schema definitions
 
 (def AppParameterListItem
@@ -261,58 +261,21 @@
      :json-schema/example false}
     :boolean]])
 
-;; FIXME: This is a little clunky because it replicates all of the fields in AppParameterListItem. I haven't found a way
-;; to get it to work with merging schemas defined outside of the registry, though, and I'm not sure why. I'm leaving
-;; this as-is for now with the hopes of returning to it later.
 (def AppParameterListGroup
   (m/schema
-    [:schema {:registry {::AppParameterListGroup
-                         [:map {:closed true}
-                          [:id
-                           {:description         "A UUID that is used to identify the List Item"
-                            :json-schema/example #uuid "789a0123-c45d-67e8-f901-234567890abc"}
-                           :uuid]
-
-                          [:name
-                           {:optional            true
-                            :description         "The List Item's name"
-                            :json-schema/example "genome_size_group"}
-                           :string]
-
-                          [:value
-                           {:optional            true
-                            :description         "The List Item's value"
-                            :json-schema/example "size_group"}
-                           :string]
-
-                          [:description
-                           {:optional            true
-                            :description         "The List Item's description"
-                            :json-schema/example "Genome size selection group"}
-                           :string]
-
-                          [:display
-                           {:optional            true
-                            :description         "The List Item's display label"
-                            :json-schema/example "Genome Size"}
-                           :string]
-
-                          [:isDefault
-                           {:optional            true
-                            :description         "Flags this Item as the List's default selection"
-                            :json-schema/example false}
-                           :boolean]
-
-                          [:arguments
-                           {:optional    true
-                            :description TreeSelectorGroupParameterListDocs}
-                           [:vector AppParameterListItem]]
-
-                          [:groups
-                           {:optional    true
-                            :description TreeSelectorGroupGroupListDocs}
-                           [:vector [:ref ::AppParameterListGroup]]]]}}
-     [:ref ::AppParameterListGroup]]))
+   [:schema
+    {:registry
+     {::AppParameterListGroup
+      (conj (m/form AppParameterListItem)
+            [:arguments
+             {:optional    true
+              :description TreeSelectorGroupParameterListDocs}
+             [:vector AppParameterListItem]]
+            [:groups
+             {:optional    true
+              :description TreeSelectorGroupGroupListDocs}
+             [:vector [:ref ::AppParameterListGroup]]])}}
+    ::AppParameterListGroup]))
 
 (def AppParameterListItemOrTree
   (mu/merge
@@ -636,8 +599,9 @@
 (def AppTools
   [:map
    [:tools
-    {:description ToolListDocs}
-    [:vector {:min 1} (mu/merge Tool [:map [:deprecated {:optional true} ToolDeprecatedParam]])]]
+    {:optional    true
+     :description ToolListDocs}
+    [:vector (mu/merge Tool [:map [:deprecated {:optional true} ToolDeprecatedParam]])]]
 
    [:references
     {:optional true}
@@ -762,6 +726,7 @@
         :max_cpu_cores
         :min_gpus
         :max_gpus
+        :gpu_models
         :min_disk_space])
       (mu/merge
        [:map
@@ -792,10 +757,100 @@
           :json-schema/example 5368709120}
          :int]
 
+        [:default_max_gpus
+         {:optional            true
+          :description         "The default limit for GPUs for running the tool container"
+          :json-schema/example 2}
+         :int]
+
+        [:default_gpus
+         {:optional            true
+          :description         "The default minimum for GPUs requested for running the tool container"
+          :json-schema/example 0}
+         :int]
+
+        [:default_gpu_models
+         {:optional            true
+          :description         "The default list of acceptable GPU models"
+          :json-schema/example ["A100"]}
+         [:vector :string]]
+
         [:step_number
          {:description         "The sequential step number of the Tool in the analysis"
           :json-schema/example 1}
          :int]])))
+
+(def ResourcePreset
+  [:map {:closed true}
+   [:id
+    {:description         "The resource preset identifier."
+     :json-schema/example #uuid "8f0d3f2c-1c4a-4b7e-9a2f-5d6c7e8f9a0b"}
+    :uuid]
+
+   [:label
+    {:description         "The display label for this preset."
+     :json-schema/example "Small"}
+    :string]
+
+   [:description
+    {:description         "A longer description of this preset, or null if not set."
+     :json-schema/example "2 cores, 4 GiB"}
+    [:maybe :string]]
+
+   [:max_cpu_cores
+    {:description         "The CPU cores allocated by this preset."
+     :json-schema/example 2.0}
+    :double]
+
+   [:min_memory_limit
+    {:description         "The memory in bytes allocated by this preset."
+     :json-schema/example 4294967296}
+    :int]
+
+   [:max_gpus
+    {:description         "The number of GPUs allocated by this preset."
+     :json-schema/example 0}
+    :int]
+
+   [:time_limit_seconds
+    {:description         "The VICE analysis time limit in seconds for this preset, or null for no override."
+     :json-schema/example 28800}
+    [:maybe :int]]
+
+   [:display_order
+    {:description         "The display ordering of this preset relative to others."
+     :json-schema/example 1}
+    :int]
+
+   [:is_default
+    {:description         "True if this preset is the global default selection."
+     :json-schema/example false}
+    :boolean]
+
+   [:is_enabled
+    {:description         "True if this preset is currently active and available for selection."
+     :json-schema/example true}
+    :boolean]])
+
+(def ResourcePresetList
+  [:map {:closed true}
+   [:resource_presets {:description "The list of resource presets."} [:vector ResourcePreset]]])
+
+(def ResourcePresetRequest
+  (-> ResourcePreset
+      (mu/dissoc :id)
+      (mu/optional-keys [:description :time_limit_seconds :max_gpus :display_order :is_default :is_enabled])
+      (mu/update-properties assoc :description
+                            (str "Schema for creating a new resource preset. "
+                                 "Required: label, max_cpu_cores, min_memory_limit."))))
+
+(def ResourcePresetUpdateRequest
+  (-> ResourcePreset
+      (mu/dissoc :id)
+      mu/optional-keys
+      (mu/update-properties assoc :description
+                            (str "Schema for updating an existing resource preset. All fields are optional. "
+                                 "Nullable fields (description, time_limit_seconds) accept null to clear the value."))))
 
 (def AppGroupJobView
   (mu/merge
@@ -822,43 +877,69 @@
   (-> (mu/merge AppBase AppLimitChecks)
       (mu/merge AppVersionListing)
       (mu/merge
-        [:map
-    {:closed true}
+       [:map
+        {:closed true}
 
-    [:id
-     {:description         "The app ID."
-      :json-schema/example "app-id-abc123"}
-     :string]
+        [:id
+         {:description         "The app ID."
+          :json-schema/example "app-id-abc123"}
+         :string]
 
-    [:app_type
-     {:description         "DE or External."
-      :json-schema/example "DE"}
-     :string]
+        [:app_type
+         {:description         "DE or External."
+          :json-schema/example "DE"}
+         :string]
 
-    [:label
-     {:description         "An alias for the App's name"
-      :json-schema/example "BLAST Analysis Tool"}
-     :string]
+        [:label
+         {:description         "An alias for the App's name"
+          :json-schema/example "BLAST Analysis Tool"}
+         :string]
 
-    [:deleted AppDeletedParam]
+        [:deleted AppDeletedParam]
 
-    [:disabled AppDisabledParam]
+        [:disabled AppDisabledParam]
 
-    [:debug
-     {:optional            true
-      :description         "True if input files should be retained for the job by default."
-      :json-schema/example false}
-     :boolean]
+        [:debug
+         {:optional            true
+          :description         "True if input files should be retained for the job by default."
+          :json-schema/example false}
+         :boolean]
 
-    [:requirements
-     {:optional    true
-      :description "The list of resource requirements for each step"}
-     [:vector AppStepResourceRequirements]]
+        [:mount_data_store
+         {:optional            true
+          :description         "True if iRODS data store mounts should be created in the analysis container."
+          :json-schema/example true}
+         :boolean]
 
-    [:groups
-     {:optional    true
-      :description GroupListDocs}
-     [:vector AppGroupJobView]]])))
+        [:overall_job_type
+         {:optional            true
+          :description         "The overall job type of the app: interactive, executable, osg, mixed, or unknown."
+          :json-schema/example "executable"}
+         :string]
+
+        [:time_limit_seconds
+         {:optional    true
+          :description
+          (str "The initial duration in seconds from the original submission, returned on relaunch-info and "
+               "saved-launch-info responses.")
+          :json-schema/example 28800}
+         :int]
+
+        [:max_time_limit_seconds
+         {:optional            true
+          :description         "The maximum initial duration that may be requested at launch time, in seconds."
+          :json-schema/example 86400}
+         :int]
+
+        [:requirements
+         {:optional    true
+          :description "The list of resource requirements for each step"}
+         [:vector AppStepResourceRequirements]]
+
+        [:groups
+         {:optional    true
+          :description GroupListDocs}
+         [:vector AppGroupJobView]]])))
 
 (def AppDetailCategory
   [:map {:closed true}
@@ -1076,8 +1157,7 @@
         [:references AppReferencesParam]
 
         [:job_stats
-         {:optional    true
-          :description AppListingJobStatsDocs}
+         {:description AppListingJobStatsDocs}
          AppListingJobStats]
 
         [:categories
@@ -1086,13 +1166,10 @@
 
         [:suggested_categories
          {:description "The list of Categories the integrator wishes to associate with the App"}
-         [:vector AppDetailCategory]]
-
-        [:hierarchies
-         {:optional    true
-          :description "A list of Ontology Class hierarchies"}
-         [:vector OntologyClassHierarchy]]])
-      (mu/merge AppVersionListing)))
+         [:vector AppDetailCategory]]])
+      (mu/merge AppVersionListing)
+      (mu/merge OntologyHierarchyList)
+      (mu/optional-keys [:job_stats :hierarchies])))
 
 (def AppListing
   [:map {:closed true}
@@ -1129,46 +1206,70 @@
      :json-schema/example "DE"}
     :string]])
 
+(def AttributeValueSelectionParams
+  [:map {:closed true}
+   [:attribute
+    {:optional            true
+     :description         (str "Must be used in conjunction with `attribute_value`. If specified, only apps that "
+                               "are tagged with the specified attribute/value pair will be included in the listing.")
+     :json-schema/example "category"}
+    :string]
+
+   [:attribute_value
+    {:optional            true
+     :description         (str "Must be used in conjunction with `attribute`. If specified, only apps that are "
+                               "tagged with the specified attribute/value pair will be included in the listing.")
+     :json-schema/example "genomics"}
+    :string]])
+
 (def AppListingPagingParams
   (-> (mu/merge PagingParams AppFilterParams)
+      (mu/merge AttributeValueSelectionParams)
       (mu/merge
-        [:map {:closed true}
-         [:sort-field
-          {:description SortFieldDocs
-           :optional    true}
-          (into [:enum] AppListingValidSortFields)]])))
+       [:map {:closed true}
+        [:sort-field
+         {:description SortFieldDocs
+          :optional    true}
+         (into [:enum] AppListingValidSortFields)]])))
 
 (def AppJobStatsStartDateParamDocs "Filters out the app stats before this start date")
 
+(def AppJobStatsStartDateOptionalParam
+  [:start_date
+   {:optional            true
+    :description         AppJobStatsStartDateParamDocs
+    :json-schema/example #inst "2024-01-01T00:00:00.000-00:00"}
+   inst?])
+
 (def AppJobStatsEndDateParamDocs "Filters out the apps stats after this end date")
+
+(def AppJobStatsEndDateOptionalParam
+  [:end_date
+   {:optional            true
+    :description         AppJobStatsEndDateParamDocs
+    :json-schema/example #inst "2025-12-31T23:59:59.000-00:00"}
+   inst?])
 
 (def AppSearchParams
   (-> (mu/merge PagingParams AppFilterParams)
+      (mu/merge AttributeValueSelectionParams)
       (mu/merge
-        [:map {:closed true}
+       [:map {:closed true}
 
-         [:search
-          {:optional            true
-           :description         "The pattern to match in an App's Name, Description, Integrator Name, or Tool Name."
-           :json-schema/example "BLAST"}
-          :string]
+        [:search
+         {:optional            true
+          :description         "The pattern to match in an App's Name, Description, Integrator Name, or Tool Name."
+          :json-schema/example "BLAST"}
+         :string]
 
-         [:start_date
-          {:optional            true
-           :description         AppJobStatsStartDateParamDocs
-           :json-schema/example #inst "2024-01-01T00:00:00.000-00:00"}
-          inst?]
+        AppJobStatsStartDateOptionalParam
 
-         [:end_date
-          {:optional            true
-           :description         AppJobStatsEndDateParamDocs
-           :json-schema/example #inst "2025-12-31T23:59:59.000-00:00"}
-          inst?]
+        AppJobStatsEndDateOptionalParam
 
-         [:sort-field
-          {:description SortFieldDocs
-           :optional    true}
-          (into [:enum] AppSearchValidSortFields)]])))
+        [:sort-field
+         {:description SortFieldDocs
+          :optional    true}
+         (into [:enum] AppSearchValidSortFields)]])))
 
 (def QualifiedAppId
   [:map {:closed true}
@@ -1192,59 +1293,21 @@
 (def AppParameterListItemRequest
   (mu/optional-keys AppParameterListItem [:id]))
 
-;; FIXME: This is a little clunky because it replicates all of the fields in AppParameterListGroup. I haven't
-;; found a way to get it to work with merging schemas defined outside of the registry, though, and I'm not sure
-;; why. I'm leaving this as-is for now with the hopes of returning to it later.
 (def AppParameterListGroupRequest
   (m/schema
-   [:schema {:registry {::AppParameterListGroupRequest
-                        [:map {:closed true}
-                         [:id
-                          {:description         "A UUID that is used to identify the List Item"
-                           :json-schema/example #uuid "789a0123-c45d-67e8-f901-234567890abc"
-                           :optional            true}
-                          :uuid]
-
-                         [:name
-                          {:optional            true
-                           :description         "The List Item's name"
-                           :json-schema/example "genome_size_group"}
-                          :string]
-
-                         [:value
-                          {:optional            true
-                           :description         "The List Item's value"
-                           :json-schema/example "size_group"}
-                          :string]
-
-                         [:description
-                          {:optional            true
-                           :description         "The List Item's description"
-                           :json-schema/example "Genome size selection group"}
-                          :string]
-
-                         [:display
-                          {:optional            true
-                           :description         "The List Item's display label"
-                           :json-schema/example "Genome Size"}
-                          :string]
-
-                         [:isDefault
-                          {:optional            true
-                           :description         "Flags this Item as the List's default selection"
-                           :json-schema/example false}
-                          :boolean]
-
-                         [:arguments
-                          {:optional    true
-                           :description TreeSelectorGroupParameterListDocs}
-                          [:vector AppParameterListItemRequest]]
-
-                         [:groups
-                          {:optional    true
-                           :description TreeSelectorGroupGroupListDocs}
-                          [:vector [:ref ::AppParameterListGroupRequest]]]]}}
-    [:ref ::AppParameterListGroupRequest]]))
+   [:schema
+    {:registry
+     {::AppParameterListGroupRequest
+      (conj (m/form AppParameterListItemRequest)
+            [:arguments
+             {:optional    true
+              :description TreeSelectorGroupParameterListDocs}
+             [:vector AppParameterListItemRequest]]
+            [:groups
+             {:optional    true
+              :description TreeSelectorGroupGroupListDocs}
+             [:vector [:ref ::AppParameterListGroupRequest]]])}}
+    ::AppParameterListGroupRequest]))
 
 (def AppParameterListItemOrTreeRequest
   (-> AppParameterListItemOrTree
@@ -1332,7 +1395,7 @@
          AppPublicParam]
 
         [:tools
-         {:optional true
+         {:optional    true
           :description ToolListDocs}
          [:vector AppToolRequest]]])
       (mu/update-properties assoc :description "The App to preview.")))
@@ -1343,121 +1406,21 @@
 (def AppCategoryMetadataDeleteRequest
   (mu/update-properties AvuListRequest assoc :description "Community metadata to remove from the App."))
 
-;; FIXME: There's a lot of duplication here, but I haven't been able to find a good way to get reuse working with
-;; recursive schema definitions. So far, the only workaround that I've found is to duplicate everything and hope that I
-;; didn't miss any fields. Fix this when we have a better option.
 (def PublishAppRequest
-  (m/schema
-   [:schema
-    {:registry
-     {::avu-request [:map {:closed true}
-                     [:id
-                      {:description         "The AVU's UUID"
-                       :json-schema/example "70fc1080-3152-4c09-92b0-f5b9cc70088b"
-                       :optional            true}
-                      :uuid]
+  (-> AppBase
+      (mu/optional-keys [:id :name :description])
+      (mu/merge
+       [:map
+        [:documentation
+         {:optional true}
+         AppDocParam]
 
-                     [:attr
-                      {:description         "The Attribute's name"
-                       :json-schema/example "attribute-name"}
-                      :string]
-
-                     [:value
-                      {:description         "The Attribute's value"
-                       :json-schema/example "attribute-value"}
-                      :string]
-
-                     [:unit
-                      {:description         "The attribute's unit"
-                       :json-schema/example "attribute-unit"}
-                      :string]
-
-                     [:target_id
-                      {:description         "The target item's UUID"
-                       :json-schema/example "a14dfe49-f65f-418b-b3c5-6497284251fe"
-                       :optional            true}
-                      :uuid]
-
-                     [:created_by
-                      {:description         "The ID of the user who created the AVU"
-                       :json-schema/example "user123"
-                       :optional            true}
-                      :string]
-
-                     [:modified_by
-                      {:description         "The ID of the user who last modified the AVU"
-                       :json-schema/example "user321"
-                       :optional            true}
-                      :string]
-
-                     [:created_on
-                      {:description         "The date the AVU was created in ms since the POSIX epoch"
-                       :json-schema/example 1757465246000
-                       :optional            true}
-                      :int]
-
-                     [:modified_on
-                      {:description         "The date the AVU was late modified in ms since the POSIX epoch"
-                       :json-schema/example 1757465251000
-                       :optional            true}
-                      :int]
-
-                     [:avus
-                      {:description "AVUs attached to this AVU"
-                       :optional    true}
-                      [:vector [:ref ::avu-request]]]]
-      ::publish-request [:map {:closed true, :description "The user's Publish App Request."}
-                         [:id
-                          {:optional true}
-                          AppIdParam]
-
-                         [:name
-                          {:optional            true
-                           :description         "The App's name"
-                           :json-schema/example "BLAST"}
-                          :string]
-
-                         [:description
-                          {:optional            true
-                           :description         "The App's description"
-                           :json-schema/example "Basic Local Alignment Search Tool for sequence comparison"}
-                          :string]
-
-                         [:integration_date
-                          {:optional            true
-                           :description         "The App's Date of public submission"
-                           :json-schema/example #inst "2024-01-15T10:30:00.000-00:00"}
-                          inst?]
-
-                         [:edited_date
-                          {:optional            true
-                           :description         "The App's Date of its last edit"
-                           :json-schema/example #inst "2024-10-20T14:45:00.000-00:00"}
-                          inst?]
-
-                         [:system_id
-                          {:optional true}
-                          SystemId]
-
-                         [:version
-                          {:optional true}
-                          AppVersionParam]
-
-                         [:version_id
-                          {:optional true}
-                          AppVersionIdParam]
-
-                         [:documentation
-                          {:optional true}
-                          AppDocParam]
-
-                         [:references {:optional true} AppReferencesParam]
-
-                         [:avus
-                          {:optional    true
-                           :description "Community metadata to add to the App."}
-                          [:vector [:ref ::avu-request]]]]}}
-    ::publish-request]))
+        [:references
+         {:optional true}
+         AppReferencesParam]])
+      (mu/merge AppCategoryMetadataAddRequest)
+      (mu/optional-keys [:avus])
+      (mu/update-properties assoc :description "The user's Publish App Request.")))
 
 (def AppPublishableResponse
   [:map {:closed true}
@@ -1471,3 +1434,10 @@
      :description         "The reason the app can't be published if it's not publishable."
      :json-schema/example "HPC apps must be published using the TAPIS API."}
     :string]])
+
+(def ToolAppListingResponses
+  (merge CommonResponses
+         {200 {:body        AppListing
+               :description "The listing of Apps using the given Tool."}
+          404 {:body        ErrorResponseNotFound
+               :description "The `tool-id` does not exist."}}))

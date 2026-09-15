@@ -19,10 +19,7 @@
      #{OptionalKeyFilter}]
     [common-swagger-api.schema.apps common-swagger-api.malli.apps
      #{OptionalDebugKey OptionalDeprecatedKey OptionalGroupsKey OptionalParameterArgumentsKey
-       OptionalParametersKey OptionalToolsKey
-       AppJobStatsEndDateOptionalParam AppJobStatsStartDateOptionalParam
-       AttributeValueSelectionParams ResourcePreset ResourcePresetList ResourcePresetRequest
-       ResourcePresetUpdateRequest ToolAppListingResponses}]                  ; pending Task 5
+       OptionalParametersKey OptionalToolsKey}]
     [common-swagger-api.schema.apps.bootstrap common-swagger-api.malli.apps.bootstrap #{}]
     [common-swagger-api.schema.apps.categories common-swagger-api.malli.apps.categories #{}]
     [common-swagger-api.schema.apps.communities common-swagger-api.malli.apps.communities
