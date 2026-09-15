@@ -21,6 +21,8 @@
     [common-swagger-api.schema.apps common-swagger-api.malli.apps
      #{OptionalDebugKey OptionalDeprecatedKey OptionalGroupsKey OptionalParameterArgumentsKey
        OptionalParametersKey OptionalToolsKey}]
+    ;; AppSubsetOptionalKey is a plumatic optional-key var; the Malli twin writes the entry inline.
+    [common-swagger-api.schema.apps.admin.apps common-swagger-api.malli.apps.admin.apps #{AppSubsetOptionalKey}]
     [common-swagger-api.schema.apps.admin.categories common-swagger-api.malli.apps.admin.categories #{}]
     [common-swagger-api.schema.apps.admin.reference-genomes common-swagger-api.malli.apps.admin.reference-genomes
      #{}]
