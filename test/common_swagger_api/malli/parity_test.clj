@@ -43,8 +43,7 @@
     [common-swagger-api.schema.permanent-id-requests common-swagger-api.malli.permanent-id-requests #{}]
     [common-swagger-api.schema.quicklaunches common-swagger-api.malli.quicklaunches #{}]
     [common-swagger-api.schema.sessions common-swagger-api.malli.sessions #{}]
-    [common-swagger-api.schema.stats common-swagger-api.malli.stats
-     #{StatResponse StatResponseIdsMap StatResponsePathsMap StatResponses}]  ; pending Task 13
+    [common-swagger-api.schema.stats common-swagger-api.malli.stats #{}]
     [common-swagger-api.schema.subjects common-swagger-api.malli.subjects #{}]
     [common-swagger-api.schema.tools common-swagger-api.malli.tools
      #{coerce-tool-import-requests coerce-tool-list-import-request
