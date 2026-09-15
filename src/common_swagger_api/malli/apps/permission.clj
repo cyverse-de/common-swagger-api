@@ -1,6 +1,7 @@
 (ns common-swagger-api.malli.apps.permission
   (:require
-   [common-swagger-api.malli :refer [ErrorResponse NonBlankString]]
+   [common-swagger-api.malli
+    :refer [CommonResponses ErrorResponse ErrorResponseForbidden ErrorResponseNotFound NonBlankString]]
    [common-swagger-api.malli.apps :refer [QualifiedAppId]]
    [common-swagger-api.malli.subjects :refer [BaseSubject]]
    [malli.util :as mu]))
@@ -142,7 +143,7 @@
       :boolean]
 
      [:error
-      {:optional true
+      {:optional    true
        :description "Information about any error that may have occurred"}
       ErrorResponse]])))
 
@@ -176,10 +177,10 @@
 
 (def AppSharingResponse
   (mu/closed-schema
-    [:map
-     [:sharing
-      {:description "The list of app sharing responses"}
-      [:vector SubjectAppSharingResponseElement]]]))
+   [:map
+    [:sharing
+     {:description "The list of app sharing responses"}
+     [:vector SubjectAppSharingResponseElement]]]))
 
 (def AppUnsharingResponseElement
   (mu/closed-schema
@@ -215,11 +216,11 @@
 (def SubjectAppUnsharingResponseElement
   (mu/closed-schema
    (mu/merge
-     SubjectAppUnsharingRequestElement
-     [:map
-      [:apps
-       {:description "The list of app sharing responses for the subject"}
-       [:vector AppUnsharingResponseElement]]])))
+    SubjectAppUnsharingRequestElement
+    [:map
+     [:apps
+      {:description "The list of app sharing responses for the subject"}
+      [:vector AppUnsharingResponseElement]]])))
 
 (def AppUnsharingRequest
   (mu/closed-schema
@@ -355,10 +356,10 @@
     [:analysis_name
      {:description         "The analysis name"
       :json-schema/example "DuckDB client for Longitudinal Brain Development Study Data"}
-     :string]
+     NonBlankString]
 
     [:ok
-     {:description         "A Boolpean flag indicating whether or not the request passed validation"
+     {:description         "A Boolean flag indicating whether or not the request passed validation"
       :json-schema/example true}
      :boolean]
 
@@ -382,14 +383,12 @@
 
 (def SubjectAnalysisUnsharingResponseElement
   (mu/closed-schema
-   [:map
-    [:subject
-     {:description "The user or group identification."}
-     BaseSubject]
-
-    [:analyses
-     {:description "The list of analysis unsharing responses for the subject"}
-     [:vector AnalysisUnsharingResponseElement]]]))
+   (mu/merge
+    SubjectAnalysisUnsharingRequestElement
+    [:map
+     [:analyses
+      {:description "The list of analysis unsharing responses for the subject"}
+      [:vector AnalysisUnsharingResponseElement]]])))
 
 (def AnalysisUnsharingRequest
   (mu/closed-schema
@@ -407,7 +406,8 @@
      [:vector SubjectAnalysisUnsharingResponseElement]]
 
     [:asyncTaskID
-     {:description         "The ID of the asynchronous task being used to track the unsharing request"
+     {:optional            true
+      :description         "The ID of the asynchronous task being used to track the unsharing request"
       :json-schema/example #uuid "834008d0-3d72-4b54-b868-561772fe5877"}
      :uuid]]))
 
@@ -436,7 +436,7 @@
 
     [:permissions
      {:description "The list of subject permissions for the Tool"}
-     SubjectPermissionListElement]]))
+     [:vector SubjectPermissionListElement]]]))
 
 (def ToolPermissionListing
   (mu/closed-schema
@@ -491,14 +491,12 @@
 
 (def SubjectToolSharingResponseElement
   (mu/closed-schema
-   [:map
-    [:subject
-     {:description "The user or group identification."}
-     BaseSubject]
-
-    [:tools
-     {:description "The list of Tool sharing responses for the subject"}
-     [:vector ToolSharingResponseElement]]]))
+   (mu/merge
+    SubjectToolSharingRequestElement
+    [:map
+     [:tools
+      {:description "The list of Tool sharing responses for the subject"}
+      [:vector ToolSharingResponseElement]]])))
 
 (def ToolSharingRequest
   (mu/closed-schema
@@ -553,14 +551,12 @@
 
 (def SubjectToolUnsharingResponseElement
   (mu/closed-schema
-   [:map
-    [:subject
-     {:description "The user or group identification."}
-     BaseSubject]
-
-    [:tools
-     {:description "The list of Tool unsharing responses for the subject"}
-     [:vector ToolUnsharingResponseElement]]]))
+   (mu/merge
+    SubjectToolUnsharingRequestElement
+    [:map
+     [:tools
+      {:description "The list of Tool unsharing responses for the subject"}
+      [:vector ToolUnsharingResponseElement]]])))
 
 (def ToolUnsharingRequest
   (mu/closed-schema
@@ -576,3 +572,12 @@
     [:unsharing
      {:description "The list of unsharing responses for individual subjects"}
      [:vector SubjectToolUnsharingResponseElement]]]))
+
+(def ToolPermissionsListingResponses
+  (merge CommonResponses
+         {200 {:body        ToolPermissionListing
+               :description "The Tool permission listings."}
+          403 {:body        ErrorResponseForbidden
+               :description "The requesting user does not have `read` permission for some Tool(s) in the request."}
+          404 {:body        ErrorResponseNotFound
+               :description "Some `tool-id`(s) in the request do not exist."}}))

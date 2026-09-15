@@ -24,8 +24,7 @@
     [common-swagger-api.schema.apps.communities common-swagger-api.malli.apps.communities #{}]
     [common-swagger-api.schema.apps.elements common-swagger-api.malli.apps.elements #{}]
     [common-swagger-api.schema.apps.metadata common-swagger-api.malli.apps.metadata #{}]
-    [common-swagger-api.schema.apps.permission common-swagger-api.malli.apps.permission
-     #{ToolPermissionsListingResponses}]                                     ; pending Task 11
+    [common-swagger-api.schema.apps.permission common-swagger-api.malli.apps.permission #{}]
     [common-swagger-api.schema.apps.rating common-swagger-api.malli.apps.rating #{}]
     [common-swagger-api.schema.apps.reference-genomes common-swagger-api.malli.apps.reference-genomes #{}]
     [common-swagger-api.schema.apps.workspace common-swagger-api.malli.apps.workspace #{}]
