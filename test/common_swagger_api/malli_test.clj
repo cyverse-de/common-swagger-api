@@ -4,6 +4,7 @@
    [common-swagger-api.malli :as m]
    [common-swagger-api.malli.test-util :refer [invalid json-schema-ok valid]]
    [malli.core :as malli]
+   [malli.json-schema :as js]
    [malli.util :as mu]))
 
 (deftest add-enum-values
@@ -55,6 +56,21 @@
          {:error_code "ERR_UNCHECKED_EXCEPTION"}
          {:error_code "ERR_SCHEMA_VALIDATION" :reason {:detail 1}})
   (invalid m/ErrorResponseUnchecked {:error_code "ERR_NOT_FOUND"}))
+
+(deftest transform-enum
+  (is (mu/equals [:enum "a" "b"] (m/transform-enum [:enum :a :b] name)))
+  (is (= {:description "d"} (malli/properties (m/transform-enum [:enum {:description "d"} :a] name)))))
+
+(deftest doc-only
+  (let [schema (m/doc-only [:map-of :keyword :string] [:map [:api-name :string]])]
+    (valid schema {:github "http://x"})
+    (invalid schema {:github 1})
+    (is (= {:type "object" :properties {:api-name {:type "string"}} :required [:api-name]}
+           (js/transform schema)))))
+
+(deftest CommonResponses
+  (is (= #{500 :default} (set (keys m/CommonResponses))))
+  (is (= m/ErrorResponseUnchecked (get-in m/CommonResponses [500 :body]))))
 
 (deftest json-schema
   (json-schema-ok 'common-swagger-api.malli))

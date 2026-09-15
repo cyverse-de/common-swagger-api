@@ -11,8 +11,7 @@
 
 ;; Per-namespace exclusions. "pending" entries are removed as tasks land.
 (def rows
-  '[[common-swagger-api.schema common-swagger-api.malli
-     #{CommonResponses doc-only transform-enum}]                             ; pending Task 4
+  '[[common-swagger-api.schema common-swagger-api.malli #{}]
     [common-swagger-api.schema.analyses common-swagger-api.malli.analyses
      #{coerce-analysis-submission-requirements
        AnalysesRelauncherRequest AnalysisIdPathParam}]                       ; pending Task 6

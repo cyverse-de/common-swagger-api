@@ -2,6 +2,7 @@
   (:require
    [clojure-commons.error-codes :as ce]
    [malli.core :as m]
+   [malli.json-schema :as js]
    [malli.util :as mu]))
 
 (defn add-enum-values
@@ -14,6 +15,14 @@
     (if (m/schema? s) (m/form s) s)
     (into s vs)
     (m/schema s)))
+
+(defn transform-enum
+  "Maps f over the values of an enum schema, preserving its properties."
+  [enum f]
+  (let [schema (m/schema enum)]
+    (when-not (= (m/type schema) :enum)
+      (throw (ex-info "provided schema is not an enum" {:schema enum})))
+    (m/schema (into [:enum (m/properties schema)] (map f) (m/children schema)))))
 
 (def NonBlankString [:re "\\S+"])
 
@@ -157,3 +166,14 @@
      :json-schema/example "An unexpected error occurred"
      :optional            true}
     :any]])
+
+(defn doc-only
+  "Validates with schema-to-use but documents schema-to-doc, mirroring the plumatic DocOnly record."
+  [schema-to-use schema-to-doc]
+  (mu/update-properties (m/schema schema-to-use) assoc :json-schema (js/transform schema-to-doc)))
+
+(def CommonResponses
+  {500      {:body        ErrorResponseUnchecked
+             :description "Unchecked errors"}
+   :default {:body        ErrorResponse
+             :description "All other errors"}})
