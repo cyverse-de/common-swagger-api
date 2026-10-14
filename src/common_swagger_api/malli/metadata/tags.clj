@@ -16,7 +16,7 @@
 
 (def TagValueString [:and NonBlankString [:string {:max 255}]])
 
-(def TagSuggestLimit [:and :int [:fn pos?]])
+(def TagSuggestLimit [:int {:min 1}])
 
 (def GetTagsSummary "List All Attached Tags for a User")
 (def GetTagsDescription "This endpoint lists all tags that have been attached to a file or folder by a user.")

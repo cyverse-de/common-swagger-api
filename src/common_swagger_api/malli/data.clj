@@ -31,7 +31,7 @@
 (def DataIds
   [:map {:closed true}
    [:ids
-    {:description "A list of iRODS data-object UUIDs"
+    {:description         "A list of iRODS data-object UUIDs"
      :json-schema/example [#uuid "8a950a63-f999-403c-912e-97e11109e68e"
                            #uuid "87f902c1-868b-4a36-86c1-7d5d268171bf"]}
     [:vector :uuid]]])

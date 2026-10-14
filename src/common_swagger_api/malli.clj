@@ -2,7 +2,9 @@
   (:require
    [clojure-commons.error-codes :as ce]
    [malli.core :as m]
+   [malli.generator :as mg]
    [malli.json-schema :as js]
+   [malli.swagger :as swagger]
    [malli.util :as mu]))
 
 (defn add-enum-values
@@ -54,14 +56,14 @@
                                "See http://www.postgresql.org/docs/9.2/interactive/queries-limit.html")
      :json-schema/example 50
      :optional            true}
-    [:and :int [:fn pos?]]]
+    [:int {:min 1}]]
 
    [:offset
     {:description         (str "Skips the first X number of results in the listing array. "
                                "See http://www.postgresql.org/docs/9.2/interactive/queries-limit.html")
      :json-schema/example 0
      :optional            true}
-    [:and :int [:fn (comp not neg?)]]]
+    [:int {:min 0}]]
 
    [:sort-field
     {:description         SortFieldDocs
@@ -167,10 +169,23 @@
      :optional            true}
     :any]])
 
+(def ^:private DocOnly
+  (m/-proxy-schema {:type ::doc-only
+                    :min  2
+                    :max  2
+                    :fn   (fn [_ children options]
+                            (let [children (mapv #(m/schema % options) children)]
+                              [children (mapv m/form children) (first children)]))}))
+
+;; The documented schema is converted when the docs are generated, so refs and dialect follow the generator in use.
+(defmethod js/accept ::doc-only [_ _ [_ doc] _] doc)
+(defmethod swagger/accept ::doc-only [_ _ [_ doc] _] doc)
+(defmethod mg/-schema-generator ::doc-only [schema options] (mg/generator (first (m/children schema)) options))
+
 (defn doc-only
   "Validates with schema-to-use but documents schema-to-doc, mirroring the plumatic DocOnly record."
   [schema-to-use schema-to-doc]
-  (mu/update-properties (m/schema schema-to-use) assoc :json-schema (js/transform schema-to-doc)))
+  (m/into-schema DocOnly nil [schema-to-use schema-to-doc]))
 
 (def CommonResponses
   {500      {:body        ErrorResponseUnchecked

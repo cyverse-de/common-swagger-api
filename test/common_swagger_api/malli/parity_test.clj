@@ -4,8 +4,12 @@
    [clojure.set :as set]
    [clojure.string :as string]
    [clojure.test :refer [deftest is]]
+   [clojure.test.check.generators :as gen]
    [malli.core :as m]
-   [schema.core :as s]))
+   [malli.generator :as mg]
+   [schema.coerce :as sc]
+   [schema.core :as s]
+   [schema.utils :as su]))
 
 ;; compojure-api re-exports and plumatic-only helpers that have no Malli twin. These live in the core namespace, so
 ;; they are the exclusions for that namespace alone.
@@ -56,14 +60,16 @@
   (str (string/replace (string/replace (str ns-sym) "-" "_") "." "/") ".clj"))
 
 (defn- schema-namespaces
-  "Every namespace under the plumatic schema directory, read off the source tree."
+  "Every namespace under the plumatic schema directory, located through the classpath."
   []
-  (->> (file-seq (io/file "src" "common_swagger_api" "schema"))
-       (filter #(.isFile ^java.io.File %))
-       (map #(.getPath ^java.io.File %))
-       (filter #(string/ends-with? % ".clj"))
-       (map #(path->ns (string/replace % #"^src/" "")))
-       sort))
+  (let [root (.getParentFile (io/file (io/resource "common_swagger_api/schema.clj")))
+        dir  (io/file root "schema")]
+    (->> (file-seq dir)
+         (filter #(.isFile ^java.io.File %))
+         (map #(str (.relativize (.toPath root) (.toPath ^java.io.File %))))
+         (filter #(string/ends-with? % ".clj"))
+         (map #(path->ns (str "common_swagger_api/" %)))
+         sort)))
 
 (defn- malli-twin
   [ns-sym]
@@ -118,13 +124,14 @@
   (set (for [[k props] (m/children schema) :when (= optional? (boolean (:optional props)))] k)))
 
 (defn- compare-map-keys
-  "Compares the required and optional key sets of a plumatic/Malli pair, then recurses into the entries that are
-   maps on both sides. Entry pairs that are not both maps are left alone."
+  "Compares the required and optional key sets and closedness of a plumatic/Malli pair, then recurses into the entries
+   that are maps on both sides. Entry pairs that are not both maps are left alone."
   [label path p malli-schema seen]
   (when-let [[pm seen] (plumatic-map p seen)]
     (when-let [mm (malli-map malli-schema)]
       (is (= (plumatic-keys pm s/required-key?) (malli-keys mm false)) (str label " " path " required keys"))
       (is (= (plumatic-keys pm s/optional-key?) (malli-keys mm true)) (str label " " path " optional keys"))
+      (is (:closed (m/properties mm)) (str label " " path " is open but the plumatic map is closed"))
       (let [entries (into {} (map (fn [[k _ child]] [k child])) (m/children mm))]
         (doseq [[k pc] pm :let [k (s/explicit-schema-key k)] :when (contains? entries k)]
           (compare-map-keys label (conj path k) pc (entries k) seen))))))
@@ -136,3 +143,31 @@
                                        excluded)]
           sym (sort shared)]
     (compare-map-keys (str malli-ns "/" sym) [] @(ns-resolve schema-ns sym) @(ns-resolve malli-ns sym) #{})))
+
+;; :re has no generator without test.chuck; every :re here is NonBlankString or a looser pattern.
+(defmethod mg/-schema-generator :re [_ _] (gen/fmap #(str "x" %) gen/string-alphanumeric))
+
+;; Cheshire decodes small JSON integers as Integer, which plumatic Integer fields rely on.
+(defn- json-ints
+  [schema]
+  (when (= Integer schema)
+    #(if (and (int? %) (<= Integer/MIN_VALUE % Integer/MAX_VALUE)) (int %) %)))
+
+(defn- malli-schema?
+  [x]
+  (and (not (string? x)) (not (fn? x)) (not (set? x)) (try (m/schema x) true (catch Exception _ false))))
+
+(deftest generated-values-satisfy-plumatic
+  (doseq [[schema-ns malli-ns excluded] rows
+          :let  [shared (set/difference (set/intersection (public-names schema-ns)
+                                                          (or (public-names malli-ns) #{}))
+                                        excluded)]
+          sym   (sort shared)
+          :let  [malli-schema @(ns-resolve malli-ns sym)]
+          :when (malli-schema? malli-schema)
+          :let  [check  (sc/coercer @(ns-resolve schema-ns sym) json-ints)
+                 failed (->> (range 25)
+                             (map #(mg/generate malli-schema {:size 4 :seed %}))
+                             (keep #(let [result (check %)] (when (su/error? result) [% (su/error-val result)])))
+                             first)]]
+    (is (nil? failed) (str malli-ns "/" sym " generated " (pr-str failed)))))

@@ -49,7 +49,8 @@
 
     [:attribute_values
      {:optional            true
-      :description         "A list of additional attributes applied to the subject"}
+      :description         "A list of additional attributes applied to the subject"
+      :json-schema/example ["staff" "faculty"]}
      [:vector :string]]
 
     [:description

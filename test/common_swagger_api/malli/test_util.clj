@@ -80,14 +80,14 @@
           (concat own kids))))))
 
 (defn examples-valid
-  "Asserts that every :json-schema/example in the namespace's public map schemas validates against the schema it
+  "Asserts that every :json-schema/example in the namespace's public schemas validates against the schema it
    documents. Returns the number of examples checked."
   [ns-sym]
   (require ns-sym)
   (let [examples (for [[sym v] (ns-publics ns-sym)
                        :when   (schema-var? v)
                        :let    [schema (deref-schema @v)]
-                       :when   (and schema (= :map (m/type schema)))
+                       :when   schema
                        triple  (schema-examples [] schema #{})]
                    (cons sym triple))]
     (doseq [[sym path schema example] examples]

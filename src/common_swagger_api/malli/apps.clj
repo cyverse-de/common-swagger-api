@@ -602,7 +602,7 @@
     AppLimitCheckResultSummary]])
 
 (def AppTools
-  [:map
+  [:map {:closed true}
    [:tools
     {:optional    true
      :description ToolListDocs}
@@ -1293,8 +1293,9 @@
     [:vector QualifiedAppId]]
 
    [:root_deletion_request
-    {:description "Set to `true` to delete one or more public apps"
-     :optional    true}
+    {:description         "Set to `true` to delete one or more public apps"
+     :json-schema/example false
+     :optional            true}
     :boolean]])
 
 (def AppParameterListItemRequest

@@ -21,8 +21,6 @@
   :managed-dependencies [[com.fasterxml.jackson.core/jackson-annotations "2.21"]
                          [com.fasterxml.jackson.core/jackson-databind "2.21.1"]
                          [commons-codec "1.16.1"]
-                         ;; compojure-api's ring-middleware-format and malli's edamame disagree.
-                         [org.clojure/tools.reader "1.5.2"]
                          [potemkin "0.4.5"]
                          [prismatic/schema "1.1.12"]
                          [ring/ring-codec "1.1.0"]
@@ -37,6 +35,8 @@
                  [metosin/schema-tools "0.14.0"]
                  [org.cyverse/clojure-commons "3.0.13"]
                  [org.cyverse/heuristomancer "2.8.8"]
+                 ;; Direct so consumers get it too: compojure-api's ring-middleware-format and malli's edamame disagree.
+                 [org.clojure/tools.reader "1.5.2"]
                  [org.flatland/ordered "1.15.12"]]
   :eastwood {:exclude-namespaces [common-swagger-api.schema.data.exists
                                   common-swagger-api.schema.data.tickets
