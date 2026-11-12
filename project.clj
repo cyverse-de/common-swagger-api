@@ -27,10 +27,16 @@
                          [ring/ring-core "1.6.3"]]
   :dependencies [[org.clojure/clojure "1.12.5"]
                  [cheshire "6.2.0"]
-                 [metosin/compojure-api "1.1.14"]
+                 ;; Direct because medley.core must not depend on clojure-commons' transitive.
+                 [dev.weavejester/medley "1.10.0"]
+                 ;; old medley redefines abs on Clojure 1.12; dev.weavejester/medley replaces it.
+                 [metosin/compojure-api "1.1.14" :exclusions [medley]]
+                 [metosin/malli "0.20.1"]
                  [metosin/schema-tools "0.14.0"]
                  [org.cyverse/clojure-commons "3.0.13"]
                  [org.cyverse/heuristomancer "2.8.8"]
+                 ;; Direct so consumers get it too: compojure-api's ring-middleware-format and malli's edamame disagree.
+                 [org.clojure/tools.reader "1.5.2"]
                  [org.flatland/ordered "1.15.12"]]
   :eastwood {:exclude-namespaces [common-swagger-api.schema.data.exists
                                   common-swagger-api.schema.data.tickets
