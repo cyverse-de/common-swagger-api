@@ -313,6 +313,15 @@
               also be used for positional arguments, but this flag tends to be useful only for trailing
               positional arguments")
 
+   (optional-key :is_sensitive)
+   (describe Boolean
+             "Marks the Parameter's value as sensitive — currently only meaningful for
+              `EnvironmentVariable`-typed Parameters. A sensitive value is injected into the running
+              analysis the same way any other environment variable is, but is never written into a job
+              submission's persisted record, a saved launch or instant launch config, or any
+              listing/preview endpoint that would otherwise echo Parameter values back. Defaults to
+              `false`")
+
    :type
    (describe String
              "The Parameter's type name. Must contain the name of one of the Parameter types defined in the
