@@ -135,8 +135,11 @@
          parameter
          (assoc parameter :name "--input" :label "Input File" :order 1 :required true)
          (assoc parameter :file_parameters {:format "fasta"} :arguments [list-item]
-                :validators [{:type "IntAbove" :params [0]}]))
-  (invalid apps/AppParameter {} (dissoc parameter :type) (assoc parameter :order "1")))
+                :validators [{:type "IntAbove" :params [0]}])
+         (assoc parameter :type "EnvironmentVariable" :is_sensitive true)
+         (assoc parameter :type "EnvironmentVariable" :is_sensitive false))
+  (invalid apps/AppParameter {} (dissoc parameter :type) (assoc parameter :order "1")
+           (assoc parameter :is_sensitive "yes") (assoc parameter :is_sensitive nil)))
 
 (deftest AppGroup
   (valid apps/AppGroup group (assoc group :name "input_parameters" :isVisible true)
